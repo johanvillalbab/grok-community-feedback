@@ -1,0 +1,38 @@
+{
+  "name": "grok-community-feedback",
+  "private": true,
+  "version": "0.1.0",
+  "description": "An exploratory community feedback workspace for Grok ideas and proposals.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johanvillalbab/grok-community-feedback.git"
+  },
+  "homepage": "https://github.com/johanvillalbab/grok-community-feedback#readme",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-markdown": "^10.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.1.0",
+    "oxlint": "^1.79.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.2"
+  }
+}

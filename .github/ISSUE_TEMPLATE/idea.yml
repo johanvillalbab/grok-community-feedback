@@ -1,0 +1,36 @@
+name: Community feedback
+description: Share an observation, idea, or proposal for the prototype.
+title: "[Feedback] "
+labels:
+  - feedback
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing. Remove private information from text, screenshots, and links before submitting.
+  - type: textarea
+    id: observation
+    attributes:
+      label: What did you notice?
+      description: Describe the behavior, friction, or opportunity in plain language.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Where did this happen, and what were you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Better outcome
+      description: What change would make the experience better?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting material
+      description: Add sanitized screenshots, links, or examples if they help.

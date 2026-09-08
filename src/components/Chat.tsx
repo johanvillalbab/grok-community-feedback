@@ -1,17 +1,32 @@
 import type { ReactNode } from 'react'
+import { CANVASES, canvasesForConversation } from '../data'
 import type { Conversation, FeedItem, InlineToken } from '../types'
 import { Avatar, AvatarStack } from './Avatar'
+import { CanvasChip } from './CanvasChip'
 import { FileChip } from './FileChip'
-import { DotsIcon, MicIcon, MonitorIcon, PlusIcon, ReplyIcon, ShareIcon, SmileIcon } from './Icons'
+import { CanvasIcon, DotsIcon, MicIcon, MonitorIcon, PlusIcon, ReplyIcon, ShareIcon, SmileIcon } from './Icons'
 
 type ChatProps = {
   conversation: Conversation
   feed: FeedItem[]
   activeFileId: string | null
+  activeCanvasId: string | null
   onOpenFile: (fileId: string) => void
+  onOpenCanvas: (canvasId: string) => void
 }
 
-export function Chat({ conversation, feed, activeFileId, onOpenFile }: ChatProps) {
+export function Chat({
+  conversation,
+  feed,
+  activeFileId,
+  activeCanvasId,
+  onOpenFile,
+  onOpenCanvas,
+}: ChatProps) {
+  const canvases = canvasesForConversation(conversation.id)
+  const headerCanvas = canvases[0]
+  const openCanvas = activeCanvasId ? CANVASES[activeCanvasId] : undefined
+
   return (
     <section className="grok-chat">
       <header className="chat-header">
@@ -20,6 +35,22 @@ export function Chat({ conversation, feed, activeFileId, onOpenFile }: ChatProps
           <h1>{conversation.title}</h1>
         </div>
         <div className="chat-header__actions">
+          {headerCanvas ? (
+            <button
+              type="button"
+              className={[
+                'chat-icon-button',
+                'chat-header__button',
+                activeCanvasId ? 'chat-header__button--active' : '',
+              ].join(' ')}
+              aria-label={openCanvas ? `Canvas open: ${openCanvas.title}` : `Open canvas: ${headerCanvas.title}`}
+              aria-expanded={Boolean(activeCanvasId)}
+              aria-controls={activeCanvasId ? 'workspace-canvas-panel' : undefined}
+              onClick={() => onOpenCanvas(activeCanvasId ?? headerCanvas.id)}
+            >
+              <CanvasIcon />
+            </button>
+          ) : null}
           <IconButton label="Share" className="chat-header__button">
             <ShareIcon />
           </IconButton>
@@ -36,7 +67,9 @@ export function Chat({ conversation, feed, activeFileId, onOpenFile }: ChatProps
               key={item.id}
               item={item}
               activeFileId={activeFileId}
+              activeCanvasId={activeCanvasId}
               onOpenFile={onOpenFile}
+              onOpenCanvas={onOpenCanvas}
             />
           ))}
         </div>
@@ -66,11 +99,15 @@ export function Chat({ conversation, feed, activeFileId, onOpenFile }: ChatProps
 function FeedRow({
   item,
   activeFileId,
+  activeCanvasId,
   onOpenFile,
+  onOpenCanvas,
 }: {
   item: FeedItem
   activeFileId: string | null
+  activeCanvasId: string | null
   onOpenFile: (fileId: string) => void
+  onOpenCanvas: (canvasId: string) => void
 }) {
   switch (item.kind) {
     case 'message':
@@ -91,7 +128,14 @@ function FeedRow({
             {item.blocks.map((block, index) => (
               <p key={index}>
                 {block.map((token, tokenIndex) => (
-                  <Inline key={tokenIndex} token={token} activeFileId={activeFileId} onOpenFile={onOpenFile} />
+                  <Inline
+                    key={tokenIndex}
+                    token={token}
+                    activeFileId={activeFileId}
+                    activeCanvasId={activeCanvasId}
+                    onOpenFile={onOpenFile}
+                    onOpenCanvas={onOpenCanvas}
+                  />
                 ))}
               </p>
             ))}
@@ -132,11 +176,15 @@ function FeedRow({
 function Inline({
   token,
   activeFileId,
+  activeCanvasId,
   onOpenFile,
+  onOpenCanvas,
 }: {
   token: InlineToken
   activeFileId: string | null
+  activeCanvasId: string | null
   onOpenFile: (fileId: string) => void
+  onOpenCanvas: (canvasId: string) => void
 }) {
   switch (token.type) {
     case 'text':
@@ -148,6 +196,15 @@ function Inline({
           text={token.text}
           active={activeFileId === token.fileId}
           onOpen={onOpenFile}
+        />
+      )
+    case 'canvas':
+      return (
+        <CanvasChip
+          canvasId={token.canvasId}
+          text={token.text}
+          active={activeCanvasId === token.canvasId}
+          onOpen={onOpenCanvas}
         />
       )
     case 'chip':

@@ -136,6 +136,18 @@ export function CloseIcon({ className }: IconProps) {
   )
 }
 
+export function CanvasIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <g transform="rotate(45 12 12)">
+        <rect x="7.25" y="8" width="9.5" height="9.5" rx="1.4" />
+        <path d="M7.25 14.85h9.5" />
+        <path d="M12 8V3.6" />
+      </g>
+    </Icon>
+  )
+}
+
 export function FileIcon({ className }: IconProps) {
   return (
     <Icon className={className}>

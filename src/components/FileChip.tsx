@@ -28,7 +28,7 @@ export function FileChip({ fileId, text, active = false, onOpen }: FileChipProps
       role="button"
       tabIndex={0}
       aria-expanded={active}
-      aria-controls="file-preview-panel"
+      aria-controls={active ? 'file-preview-panel' : undefined}
       onClick={() => openFile(file.id)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {

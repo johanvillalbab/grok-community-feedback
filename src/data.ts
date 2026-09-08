@@ -1,4 +1,4 @@
-import type { AgentKey, Conversation, FeedItem, WorkspaceFile } from './types'
+import type { AgentKey, Conversation, FeedItem, WorkspaceCanvas, WorkspaceFile } from './types'
 
 export const CURRENT_USER = {
   name: 'Sho V.',
@@ -223,8 +223,152 @@ This file is the source of truth for page copy. Any tone change is reviewed with
   },
 }
 
+export const CANVASES: Record<string, WorkspaceCanvas> = {
+  'about-launch': {
+    id: 'about-launch',
+    title: 'About launch',
+    summary: 'Contract to PR, with the remaining reviews still open.',
+    source: 'Design Engineer thread · today',
+    stats: [
+      { value: '3', label: 'Files locked', tone: 'success' },
+      { value: '1', label: 'Open PR', tone: 'info' },
+      { value: '2', label: 'Reviews left', tone: 'warning' },
+      { value: '6', label: 'Agents in path' },
+    ],
+    callout: {
+      tone: 'info',
+      title: 'About complements, it does not repeat',
+      body: 'Home already covers School, audience, Programs, and Community. This page has to hold identity and voice.',
+    },
+    flow: {
+      title: 'Ship path',
+      direction: 'horizontal',
+      nodes: [
+        {
+          id: 'contract',
+          title: 'Contract',
+          detail: 'COMPONENT-CONTRACT.md is the source of truth. Frontend accepted it.',
+          status: 'done',
+          owner: 'Design Engineer',
+          agent: 'design',
+        },
+        {
+          id: 'copy',
+          title: 'Voice',
+          detail: 'UI-PHRASES.md is locked. Community copy dropped the “it is not X” contrast.',
+          status: 'done',
+          owner: 'Content & Brand',
+          agent: 'content',
+        },
+        {
+          id: 'wire',
+          title: 'Type wire',
+          detail: 'BO-B4 structure stands. Visual Designer can keep layout without rewriting blocks.',
+          status: 'done',
+          owner: 'Visual Designer',
+          agent: 'visual',
+        },
+        {
+          id: 'pr',
+          title: 'About PR',
+          detail: 'PR #5 is open. Match the draft; do not invent primitives outside the contract.',
+          status: 'active',
+          owner: 'Full-stack Engineer',
+          agent: 'fullstack',
+        },
+        {
+          id: 'semantic',
+          title: 'Semantic',
+          detail: 'Engineering still owes the pattern so the next push stays consistent.',
+          status: 'pending',
+          owner: 'Core · Engineering',
+          agent: 'is',
+        },
+        {
+          id: 'ship',
+          title: 'Ship',
+          detail: 'Ready once Semantic signs the pattern and Content does a last pass on the live page.',
+          status: 'pending',
+          owner: 'Product Manager',
+          agent: 'pm',
+        },
+      ],
+      edges: [
+        { from: 'contract', to: 'copy' },
+        { from: 'contract', to: 'wire' },
+        { from: 'copy', to: 'pr' },
+        { from: 'wire', to: 'pr' },
+        { from: 'pr', to: 'semantic' },
+        { from: 'semantic', to: 'ship' },
+      ],
+    },
+    table: {
+      caption: 'Work still on the board',
+      headers: ['Surface', 'Owner', 'State'],
+      rows: [
+        ['COMPONENT-CONTRACT.md', 'Design Engineer', 'Locked'],
+        ['UI-PHRASES.md', 'Content & Brand', 'Locked'],
+        ['Type wire BO-B4', 'Visual Designer', 'Approved'],
+        ['About PR #5', 'Full-stack Engineer', 'In review'],
+        ['Semantic pattern', 'Core · Engineering', 'Waiting'],
+      ],
+      rowTone: ['success', 'success', 'success', 'info', 'warning'],
+    },
+  },
+  'feedback-map': {
+    id: 'feedback-map',
+    title: 'Feedback map',
+    summary: 'Community notes clustered into four opportunities the team can act on.',
+    source: 'Community thread · last 14 days',
+    stats: [
+      { value: '47', label: 'Notes read' },
+      { value: '4', label: 'Clusters', tone: 'info' },
+      { value: '2', label: 'Ready to brief', tone: 'success' },
+      { value: '1', label: 'Needs a quote', tone: 'warning' },
+    ],
+    callout: {
+      tone: 'warning',
+      title: 'Preview is still the loudest request',
+      body: 'People keep asking to see the file the bot just wrote without leaving the thread. That is the brief.',
+    },
+    bars: {
+      title: 'Notes per cluster',
+      unit: 'notes',
+      items: [
+        { label: 'File preview', value: 18, max: 18 },
+        { label: 'Canvas / flow', value: 12, max: 18 },
+        { label: 'Bot identity', value: 9, max: 18 },
+        { label: 'Voice & copy', value: 8, max: 18 },
+      ],
+    },
+    table: {
+      caption: 'What the clusters are asking for',
+      headers: ['Cluster', 'Ask', 'State'],
+      rows: [
+        ['File preview', 'Open the .md beside chat', 'Shipped'],
+        ['Canvas / flow', 'See status without rereading', 'In progress'],
+        ['Bot identity', 'Tell agents apart at a glance', 'Keep'],
+        ['Voice & copy', 'One source for page phrases', 'Locked'],
+      ],
+      rowTone: ['success', 'info', 'neutral', 'success'],
+    },
+  },
+}
+
+export const CONVERSATION_CANVASES: Record<string, string[]> = {
+  'design-1': ['about-launch', 'feedback-map'],
+}
+
+export function canvasesForConversation(conversationId: string): WorkspaceCanvas[] {
+  return (CONVERSATION_CANVASES[conversationId] ?? [])
+    .map((id) => CANVASES[id])
+    .filter((canvas): canvas is WorkspaceCanvas => Boolean(canvas))
+}
+
 const contratoChip = { type: 'file' as const, fileId: 'contrato' }
 const llmsChip = { type: 'file' as const, fileId: 'llms' }
+const aboutCanvasChip = { type: 'canvas' as const, canvasId: 'about-launch' }
+const feedbackCanvasChip = { type: 'canvas' as const, canvasId: 'feedback-map' }
 
 export const CONVERSATIONS: Conversation[] = [
   {
@@ -437,6 +581,22 @@ export const FEEDS: Record<string, FeedItem[]> = {
           { type: 'text', text: 'Frontend opened the About PR: ' },
           { type: 'link', href: 'https://github.com/acme/atlas-platform/pull/5' },
           { type: 'text', text: ' and match it to the draft; Semantic handles the pattern for the next push.' },
+        ],
+      ],
+    },
+    {
+      kind: 'message',
+      id: 'm6',
+      blocks: [
+        [
+          {
+            type: 'text',
+            text: 'I put the ship path on a canvas so we stop hunting status across threads: ',
+          },
+          aboutCanvasChip,
+          { type: 'text', text: '. Community notes that asked for this live in ' },
+          feedbackCanvasChip,
+          { type: 'text', text: '.' },
         ],
       ],
     },

@@ -490,10 +490,22 @@ input {
   z-index: 1;
 }
 
-.chat-icon-button:hover {
+.chat-icon-button:hover,
+.chat-icon-button:focus-visible,
+.preview-panel__close:focus-visible,
+.sidebar-plus:focus-visible {
   background: #222;
   box-shadow: 0 0 0 1px rgb(255 255 255 / 8%);
   color: #fff;
+}
+
+.chat-icon-button:focus-visible,
+.preview-panel__close:focus-visible,
+.file-chip--interactive:focus-visible,
+.canvas-node:focus-visible,
+.preview-panel__resizer:focus-visible {
+  outline: 2px solid #7eb4f5;
+  outline-offset: 2px;
 }
 
 .chat-header__button {
@@ -617,6 +629,11 @@ input {
   border-color: #4a5568;
   background: #3b3b3b;
   color: #9cc6ff;
+}
+
+.file-chip--interactive:focus-visible {
+  outline: 2px solid #7eb4f5;
+  outline-offset: 2px;
 }
 
 .chat-link {
@@ -992,6 +1009,446 @@ body.is-resizing {
   font-family: var(--font-mono);
   font-size: 10px;
   line-height: 14px;
+}
+
+.chat-header__button--active,
+.chat-header__button--active:hover {
+  background: #222;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 12%);
+  color: #c4b5fd;
+}
+
+.canvas-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #c4b5fd;
+}
+
+.canvas-chip svg {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+}
+
+.canvas-chip.file-chip--interactive:hover,
+.canvas-chip.file-chip--active {
+  border-color: #5b4f7a;
+  background: #3a3348;
+  color: #ddd6fe;
+}
+
+.preview-panel__heading .canvas-panel svg,
+.canvas-panel .preview-panel__heading svg {
+  color: #c4b5fd;
+}
+
+.canvas-panel__content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.canvas-lead {
+  margin: 0;
+  color: #cfcfcf;
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.canvas-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.canvas-stat {
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  background: #141414;
+}
+
+.canvas-stat strong {
+  display: block;
+  color: #f3f3f3;
+  font-size: 14px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 16px;
+}
+
+.canvas-stat span {
+  display: block;
+  margin-top: 2px;
+  color: #8d8d8d;
+  font-size: 8px;
+  line-height: 10px;
+}
+
+.canvas-stat--success strong {
+  color: #3ecf8e;
+}
+
+.canvas-stat--warning strong {
+  color: #f0b429;
+}
+
+.canvas-stat--info strong {
+  color: #7eb4f5;
+}
+
+.canvas-callout {
+  padding: 8px 10px;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  background: #121212;
+}
+
+.canvas-callout__tone {
+  margin: 0 0 3px;
+  color: #b0b0b0;
+  font-size: 8px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  line-height: 10px;
+  text-transform: uppercase;
+}
+
+.canvas-callout--info .canvas-callout__tone {
+  color: #7eb4f5;
+}
+
+.canvas-callout--warning .canvas-callout__tone {
+  color: #f0b429;
+}
+
+.canvas-callout--success .canvas-callout__tone {
+  color: #3ecf8e;
+}
+
+.canvas-callout strong {
+  display: block;
+  color: #eee;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 13px;
+}
+
+.canvas-callout p {
+  margin: 3px 0 0;
+  color: #bdbdbd;
+  font-size: 10px;
+  line-height: 14px;
+}
+
+
+.canvas-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.canvas-section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.canvas-section h2,
+.canvas-section__head h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 14px;
+}
+
+.canvas-section__head p {
+  margin: 0;
+  color: #8d8d8d;
+  font-size: 9px;
+  line-height: 12px;
+}
+
+.canvas-flow {
+  overflow: auto;
+  border: 1px solid #242424;
+  border-radius: 10px;
+  background: #101010;
+}
+
+.canvas-flow__board {
+  position: relative;
+}
+
+.canvas-flow__edges {
+  display: block;
+}
+
+.canvas-edge {
+  fill: none;
+  stroke: #4a4a4a;
+  stroke-width: 1.2;
+}
+
+.canvas-edge--back {
+  stroke-dasharray: 3 3;
+}
+
+.canvas-node {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 6px 8px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #eee;
+  text-align: left;
+  cursor: pointer;
+}
+
+.canvas-node:focus-visible {
+  outline: 2px solid #7eb4f5;
+  outline-offset: 2px;
+}
+
+.canvas-node__title {
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.canvas-node .canvas-status {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.canvas-node--done {
+  border-color: #3ecf8e;
+  background: #13241c;
+}
+
+.canvas-node--done:hover,
+.canvas-node--done:focus-visible {
+  background: #173028;
+}
+
+.canvas-node--done .canvas-node__title {
+  color: #b8e6cf;
+}
+
+.canvas-node--active {
+  border-color: #7eb4f5;
+  background: #1a2a40;
+}
+
+.canvas-node--active:hover,
+.canvas-node--active:focus-visible {
+  background: #20344d;
+}
+
+.canvas-node--active .canvas-node__title {
+  color: #9cc6ff;
+}
+
+.canvas-node--pending {
+  border: 2px dashed #8a8a8a;
+  color: #c8c8c8;
+}
+
+.canvas-node--pending:hover,
+.canvas-node--pending:focus-visible {
+  background: #1d1d1d;
+}
+
+.canvas-node--selected {
+  box-shadow: 0 0 0 1px #c4b5fd;
+  border-color: #8b7cc4;
+}
+
+.canvas-selected {
+  padding: 8px 10px;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  background: #141414;
+}
+
+.canvas-selected p {
+  margin: 0;
+  color: #d6d6d6;
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.canvas-selected p:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.canvas-selected__owner {
+  margin-top: 5px;
+  color: #8d8d8d;
+  font-size: 9px;
+}
+
+.canvas-status {
+  flex: 0 0 auto;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #2a2a2a;
+  color: #cfcfcf;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 12px;
+}
+
+.canvas-status--done {
+  background: #1a3328;
+  color: #3ecf8e;
+}
+
+.canvas-status--active {
+  background: #1a2a40;
+  color: #7eb4f5;
+}
+
+.canvas-status--pending {
+  background: #2a2a2a;
+  color: #b0b0b0;
+}
+
+.canvas-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.canvas-bars li > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.canvas-bars span {
+  color: #d8d8d8;
+  font-size: 10px;
+  line-height: 12px;
+}
+
+.canvas-bars b {
+  color: #9a9a9a;
+  font-size: 9px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.canvas-bar {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #222;
+}
+
+.canvas-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #7eb4f5;
+}
+
+.canvas-table-wrap {
+  overflow: auto;
+  border: 1px solid #262626;
+  border-radius: 8px;
+}
+
+.canvas-table-wrap:focus-visible {
+  outline: 2px solid #7eb4f5;
+  outline-offset: 2px;
+}
+
+.canvas-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.canvas-table th,
+.canvas-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #222;
+  color: #dedede;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 13px;
+  text-align: left;
+  white-space: normal;
+}
+
+.canvas-table th {
+  color: #8d8d8d;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.canvas-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.canvas-table tr > :first-child {
+  padding-left: 18px;
+  background-image: radial-gradient(circle at 8px 50%, #5a5a5a 2px, transparent 2.5px);
+  background-repeat: no-repeat;
+}
+
+.canvas-row--success tr > :first-child,
+.canvas-row--success > :first-child {
+  background-image: radial-gradient(circle at 8px 50%, #3ecf8e 2px, transparent 2.5px);
+}
+
+.canvas-row--info > :first-child {
+  background-image: radial-gradient(circle at 8px 50%, #7eb4f5 2px, transparent 2.5px);
+}
+
+.canvas-row--warning > :first-child {
+  background-image: radial-gradient(circle at 8px 50%, #f0b429 2px, transparent 2.5px);
+}
+
+.canvas-row--neutral > :first-child {
+  background-image: radial-gradient(circle at 8px 50%, #6a6a6a 2px, transparent 2.5px);
+}
+
+@media (max-width: 900px) {
+  .canvas-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 660px) {

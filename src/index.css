@@ -1177,6 +1177,48 @@ body.is-resizing {
   line-height: 12px;
 }
 
+.canvas-flow,
+.canvas-table-wrap,
+.preview-panel__content {
+  scrollbar-width: thin;
+  scrollbar-color: #3d3d3d transparent;
+}
+
+.canvas-flow::-webkit-scrollbar,
+.canvas-table-wrap::-webkit-scrollbar,
+.preview-panel__content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.canvas-flow::-webkit-scrollbar-track,
+.canvas-table-wrap::-webkit-scrollbar-track,
+.preview-panel__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.canvas-flow::-webkit-scrollbar-thumb,
+.canvas-table-wrap::-webkit-scrollbar-thumb,
+.preview-panel__content::-webkit-scrollbar-thumb {
+  background: #3d3d3d;
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+}
+
+.canvas-flow::-webkit-scrollbar-thumb:hover,
+.canvas-table-wrap::-webkit-scrollbar-thumb:hover,
+.preview-panel__content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+  background-clip: padding-box;
+}
+
+.canvas-flow::-webkit-scrollbar-corner,
+.canvas-table-wrap::-webkit-scrollbar-corner,
+.preview-panel__content::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .canvas-flow {
   overflow: auto;
   border: 1px solid #242424;

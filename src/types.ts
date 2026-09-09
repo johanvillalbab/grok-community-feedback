@@ -67,6 +67,32 @@ export type CanvasFlowEdge = {
   to: string
 }
 
+export type GanttTask = {
+  id: string
+  laneId: string
+  title: string
+  detail: string
+  start: number
+  duration: number
+  status: CanvasNodeStatus
+  handoffTo?: string
+  passes?: string
+}
+
+export type GanttLane = {
+  id: string
+  title: string
+  agent: AgentKey
+}
+
+export type CanvasGantt = {
+  title: string
+  columns: string[]
+  today: number
+  lanes: GanttLane[]
+  tasks: GanttTask[]
+}
+
 export type WorkspaceCanvas = {
   id: string
   title: string
@@ -86,6 +112,7 @@ export type WorkspaceCanvas = {
     nodes: CanvasFlowNode[]
     edges: CanvasFlowEdge[]
   }
+  gantt?: CanvasGantt
 }
 
 export type FeedItem =

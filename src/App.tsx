@@ -4,13 +4,14 @@ import { Chat } from './components/Chat'
 import { PreviewPanel } from './components/PreviewPanel'
 import { Sidebar } from './components/Sidebar'
 import { CANVASES, CONVERSATIONS, DEFAULT_CONVERSATION_ID, FEEDS, FILES } from './data'
-import { defaultCanvasWidth, defaultPreviewWidth } from './lib/preview-layout'
+import { defaultCanvasWidth, defaultPreviewWidth, defaultSidebarWidth } from './lib/preview-layout'
 import type { OpenArtifact } from './types'
 
 export default function App() {
   const [activeId, setActiveId] = useState(DEFAULT_CONVERSATION_ID)
   const [artifact, setArtifact] = useState<OpenArtifact | null>(null)
   const [previewWidth, setPreviewWidth] = useState(defaultPreviewWidth)
+  const [sidebarWidth, setSidebarWidth] = useState(defaultSidebarWidth)
   const [liveMessage, setLiveMessage] = useState('')
   const openerRef = useRef<HTMLElement | null>(null)
 
@@ -69,6 +70,9 @@ export default function App() {
       <Sidebar
         conversations={CONVERSATIONS}
         activeId={conversation.id}
+        width={sidebarWidth}
+        onWidthChange={setSidebarWidth}
+        onAnnounce={setLiveMessage}
         onSelect={(id) => {
           setActiveId(id)
           setArtifact(null)

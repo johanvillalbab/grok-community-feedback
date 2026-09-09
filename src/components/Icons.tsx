@@ -148,6 +148,24 @@ export function CanvasIcon({ className }: IconProps) {
   )
 }
 
+export function PlanIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <rect x="3.5" y="5.5" width="8" height="3.2" rx="1.6" fill="currentColor" stroke="none" />
+      <rect x="8" y="10.4" width="12" height="3.2" rx="1.6" fill="currentColor" stroke="none" />
+      <rect x="13.5" y="15.3" width="7" height="3.2" rx="1.6" fill="currentColor" stroke="none" />
+    </Icon>
+  )
+}
+
+export function ChevronDownIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="m6 9 6 6 6-6" />
+    </Icon>
+  )
+}
+
 export function FileIcon({ className }: IconProps) {
   return (
     <Icon className={className}>

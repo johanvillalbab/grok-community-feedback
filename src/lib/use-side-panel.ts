@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent, type KeyboardEvent } from 'react'
-import { clampPreviewWidth, maxPreviewWidth, PREVIEW_MIN_WIDTH } from './preview-layout'
+import { clampPreviewWidth, maxPreviewWidth, PREVIEW_MIN_WIDTH, SIDEBAR_EXPANDED } from './preview-layout'
 
 type DragState = {
   startX: number
@@ -21,9 +21,18 @@ export function useSidePanel(onWidthChange: (width: number) => void) {
       onWidthChange(clampPreviewWidth(panel.offsetWidth, app.clientWidth, sidebarWidth))
     }
 
+    const app = panelRef.current?.parentElement
+    const sidebar = app?.querySelector('.grok-sidebar')
+    const observer = new ResizeObserver(syncBounds)
+    if (app) observer.observe(app)
+    if (sidebar instanceof HTMLElement) observer.observe(sidebar)
+
     syncBounds()
     window.addEventListener('resize', syncBounds)
-    return () => window.removeEventListener('resize', syncBounds)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', syncBounds)
+    }
   }, [onWidthChange])
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -89,5 +98,5 @@ export function useSidePanel(onWidthChange: (width: number) => void) {
 
 function readSidebarWidth(app: HTMLElement) {
   const sidebar = app.querySelector('.grok-sidebar')
-  return sidebar instanceof HTMLElement ? sidebar.offsetWidth : 203
+  return sidebar instanceof HTMLElement ? sidebar.offsetWidth : SIDEBAR_EXPANDED
 }

@@ -1,7 +1,11 @@
 const APP_SCALE = 1.2
 const CHAT_MIN = 340
 const PREVIEW_MIN = 280
-const SIDEBAR_WIDTH = 203
+export const SIDEBAR_EXPANDED = 203
+export const SIDEBAR_COLLAPSED = 56
+export const SIDEBAR_SNAP = 140
+export const SIDEBAR_MAX = 280
+const SIDEBAR_WIDTH = SIDEBAR_EXPANDED
 
 export function defaultPreviewWidth() {
   const layoutWidth = window.innerWidth / APP_SCALE
@@ -34,3 +38,31 @@ export function clampPreviewWidth(
 }
 
 export const PREVIEW_MIN_WIDTH = PREVIEW_MIN
+
+export function defaultSidebarWidth() {
+  const layoutWidth = window.innerWidth / APP_SCALE
+  return layoutWidth < 660 ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED
+}
+
+export function isSidebarCollapsed(width: number) {
+  return width < SIDEBAR_SNAP
+}
+
+export function maxSidebarWidth(appWidth: number, previewWidth: number) {
+  return Math.max(SIDEBAR_COLLAPSED, appWidth - CHAT_MIN - previewWidth)
+}
+
+export function clampSidebarWidth(
+  width: number,
+  appWidth: number,
+  previewWidth: number,
+) {
+  return Math.round(Math.min(
+    maxSidebarWidth(appWidth, previewWidth),
+    Math.max(SIDEBAR_COLLAPSED, Math.min(SIDEBAR_MAX, width)),
+  ))
+}
+
+export function snapSidebarWidth(width: number) {
+  return width < SIDEBAR_SNAP ? SIDEBAR_COLLAPSED : Math.max(width, SIDEBAR_EXPANDED)
+}

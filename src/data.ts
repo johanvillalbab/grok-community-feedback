@@ -353,10 +353,118 @@ export const CANVASES: Record<string, WorkspaceCanvas> = {
       rowTone: ['success', 'info', 'neutral', 'success'],
     },
   },
+  'about-plan': {
+    id: 'about-plan',
+    title: 'About plan',
+    summary: 'Eight-day bot plan. Each lane is a bot. Bars show when they work and what they hand to the next.',
+    source: 'Implementation plan · Design Engineer',
+    stats: [
+      { value: '8d', label: 'Duration' },
+      { value: '7', label: 'Activities' },
+      { value: '6', label: 'Bots' },
+      { value: '57%', label: 'Done', tone: 'info' },
+    ],
+    callout: {
+      tone: 'info',
+      title: 'Handoff is a file, not a meeting',
+      body: 'Each bar ends by passing a named artifact. Click a row to see who receives it and what they do next.',
+    },
+    gantt: {
+      title: 'Bot schedule',
+      columns: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8'],
+      today: 4,
+      lanes: [
+        { id: 'pm', title: 'Product Manager', agent: 'pm' },
+        { id: 'design', title: 'Design Engineer', agent: 'design' },
+        { id: 'content', title: 'Content & Brand', agent: 'content' },
+        { id: 'visual', title: 'Visual Designer', agent: 'visual' },
+        { id: 'fullstack', title: 'Full-stack', agent: 'fullstack' },
+        { id: 'is', title: 'Engineering', agent: 'is' },
+      ],
+      tasks: [
+        {
+          id: 'brief',
+          laneId: 'pm',
+          title: 'Brief',
+          detail: 'Locks the About goal: identity, not a second home. Opens the path for Design.',
+          start: 0,
+          duration: 1,
+          status: 'done',
+          handoffTo: 'contract',
+          passes: 'About brief',
+        },
+        {
+          id: 'contract',
+          laneId: 'design',
+          title: 'Contract',
+          detail: 'Writes COMPONENT-CONTRACT.md. Frontend must Accept before any code.',
+          start: 1,
+          duration: 2,
+          status: 'done',
+          handoffTo: 'copy',
+          passes: 'COMPONENT-CONTRACT.md',
+        },
+        {
+          id: 'copy',
+          laneId: 'content',
+          title: 'Voice',
+          detail: 'Locks UI-PHRASES.md. Community copy drops the “it is not X” contrast.',
+          start: 2,
+          duration: 2,
+          status: 'done',
+          handoffTo: 'pr',
+          passes: 'UI-PHRASES.md',
+        },
+        {
+          id: 'wire',
+          laneId: 'visual',
+          title: 'Type wire',
+          detail: 'BO-B4 structure only. Layout can move; blocks cannot be invented.',
+          start: 2,
+          duration: 2,
+          status: 'done',
+          handoffTo: 'pr',
+          passes: 'Type wire BO-B4',
+        },
+        {
+          id: 'pr',
+          laneId: 'fullstack',
+          title: 'About PR',
+          detail: 'Implements against the contract and the locked phrases. Opens PR #5.',
+          start: 4,
+          duration: 2,
+          status: 'active',
+          handoffTo: 'semantic',
+          passes: 'PR #5',
+        },
+        {
+          id: 'semantic',
+          laneId: 'is',
+          title: 'Semantic',
+          detail: 'Reviews the pattern so the next push stays consistent.',
+          start: 6,
+          duration: 1,
+          status: 'pending',
+          handoffTo: 'ship',
+          passes: 'Semantic sign-off',
+        },
+        {
+          id: 'ship',
+          laneId: 'pm',
+          title: 'Ship',
+          detail: 'Closes the plan once Semantic and Content pass the live page.',
+          start: 7,
+          duration: 1,
+          status: 'pending',
+          passes: 'Live About',
+        },
+      ],
+    },
+  },
 }
 
 export const CONVERSATION_CANVASES: Record<string, string[]> = {
-  'design-1': ['about-launch', 'feedback-map'],
+  'design-1': ['about-plan', 'about-launch', 'feedback-map'],
 }
 
 export function canvasesForConversation(conversationId: string): WorkspaceCanvas[] {
@@ -369,6 +477,7 @@ const contratoChip = { type: 'file' as const, fileId: 'contrato' }
 const llmsChip = { type: 'file' as const, fileId: 'llms' }
 const aboutCanvasChip = { type: 'canvas' as const, canvasId: 'about-launch' }
 const feedbackCanvasChip = { type: 'canvas' as const, canvasId: 'feedback-map' }
+const planCanvasChip = { type: 'canvas' as const, canvasId: 'about-plan' }
 
 export const CONVERSATIONS: Conversation[] = [
   {
@@ -596,6 +705,20 @@ export const FEEDS: Record<string, FeedItem[]> = {
           aboutCanvasChip,
           { type: 'text', text: '. Community notes that asked for this live in ' },
           feedbackCanvasChip,
+          { type: 'text', text: '.' },
+        ],
+      ],
+    },
+    {
+      kind: 'message',
+      id: 'm7',
+      blocks: [
+        [
+          {
+            type: 'text',
+            text: 'Asked the bot team for an implementation plan. Each lane is a bot; the bars show when they work and what they pass next: ',
+          },
+          planCanvasChip,
           { type: 'text', text: '.' },
         ],
       ],

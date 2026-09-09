@@ -3,7 +3,8 @@ import type { CanvasFlowNode, CanvasTone, WorkspaceCanvas } from '../types'
 import { computeDAGLayout } from '../lib/dag-layout'
 import { isEditableTarget } from '../lib/keyboard'
 import { useSidePanel } from '../lib/use-side-panel'
-import { CloseIcon, CanvasIcon } from './Icons'
+import { GanttBoard } from './GanttBoard'
+import { CloseIcon, CanvasIcon, PlanIcon } from './Icons'
 
 type CanvasPanelProps = {
   canvas: WorkspaceCanvas
@@ -18,10 +19,15 @@ const NODE_HEIGHT = 52
 export function CanvasPanel({ canvas, width, onWidthChange, onClose }: CanvasPanelProps) {
   const { panelRef, resizerProps } = useSidePanel(onWidthChange)
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const fallbackNodeId = canvas.flow?.nodes.find((node) => node.status === 'active')?.id
+  const fallbackNodeId = canvas.gantt?.tasks.find((task) => task.status === 'active')?.id
+    ?? canvas.gantt?.tasks[0]?.id
+    ?? canvas.flow?.nodes.find((node) => node.status === 'active')?.id
     ?? canvas.flow?.nodes[0]?.id
     ?? null
-  const activeNodeId = canvas.flow?.nodes.some((node) => node.id === selectedId)
+  const activeNodeId = (
+    canvas.gantt?.tasks.some((task) => task.id === selectedId)
+    || canvas.flow?.nodes.some((node) => node.id === selectedId)
+  )
     ? selectedId
     : fallbackNodeId
 
@@ -55,7 +61,7 @@ export function CanvasPanel({ canvas, width, onWidthChange, onClose }: CanvasPan
       <header className="preview-panel__header">
         <div className="preview-panel__heading">
           <p>
-            <CanvasIcon />
+            {canvas.gantt ? <PlanIcon /> : <CanvasIcon />}
             <span id="workspace-canvas-title">{canvas.title}</span>
           </p>
           <p>{canvas.source}</p>
@@ -92,6 +98,15 @@ export function CanvasPanel({ canvas, width, onWidthChange, onClose }: CanvasPan
           </div>
         ) : null}
 
+        {canvas.gantt ? (
+          <GanttBoard
+            canvasId={canvas.id}
+            gantt={canvas.gantt}
+            selectedId={activeNodeId}
+            onSelect={setSelectedId}
+          />
+        ) : null}
+
         {canvas.flow ? (
           <FlowBoard
             title={canvas.flow.title}
@@ -103,7 +118,7 @@ export function CanvasPanel({ canvas, width, onWidthChange, onClose }: CanvasPan
           />
         ) : null}
 
-        {selected ? <SelectedNode node={selected} /> : null}
+        {selected && !canvas.gantt ? <SelectedNode node={selected} /> : null}
 
         {canvas.bars ? (
           <section className="canvas-section" aria-labelledby={`${canvas.id}-bars-title`}>

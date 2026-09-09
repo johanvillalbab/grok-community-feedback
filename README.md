@@ -25,7 +25,7 @@ I built it with the same care I bring to my role as a SpaceX and AI community am
 
 The Canvas view started with a recurring community request: show the state of a project without forcing people to reread a long thread. A bot can now attach a Canvas to a message, and the reader can open it beside the conversation just like a file preview.
 
-The prototype includes two examples. **About launch** turns dependencies and owners into an interactive flow, while **Feedback map** groups community notes into metrics, bars, and a status table. Canvas panels are resizable, keyboard accessible, and share the same side-panel behavior as document previews.
+The prototype includes three examples. **About plan** is a Gantt of the bot team: each lane is a bot, bars show when they work, and clicking a row names the artifact they pass next. **About launch** turns dependencies and owners into an interactive flow. **Feedback map** groups community notes into metrics, bars, and a status table. Canvas panels are resizable, keyboard accessible, and share the same side-panel behavior as document previews.
 
 ## Run it locally
 

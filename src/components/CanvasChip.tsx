@@ -1,5 +1,5 @@
 import { CANVASES } from '../data'
-import { CanvasIcon } from './Icons'
+import { CanvasIcon, PlanIcon } from './Icons'
 
 type CanvasChipProps = {
   canvasId: string
@@ -27,7 +27,7 @@ export function CanvasChip({ canvasId, text, active = false, onOpen }: CanvasChi
         }
       }}
     >
-      <CanvasIcon />
+      {canvas?.gantt ? <PlanIcon /> : <CanvasIcon />}
       {label}
     </span>
   )

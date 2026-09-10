@@ -125,7 +125,7 @@ function BotFace({ shape, color, size, label, decorative }: BotFaceProps) {
         stroke={color}
         strokeWidth={shapeStroke(shape)}
         strokeLinejoin="round"
-        transform={face === 1 ? undefined : `translate(20 20) scale(${face}) translate(-20 -20)`}
+        transform={`translate(20 20) scale(${face}) translate(-20 -20)`}
       >
         <BotBody shape={shape} />
       </g>

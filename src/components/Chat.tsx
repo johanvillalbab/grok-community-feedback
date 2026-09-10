@@ -4,7 +4,7 @@ import type { Conversation, FeedItem, InlineToken } from '../types'
 import { Avatar, AvatarStack } from './Avatar'
 import { CanvasChip } from './CanvasChip'
 import { FileChip } from './FileChip'
-import { CanvasIcon, DotsIcon, MicIcon, MonitorIcon, PlusIcon, ReplyIcon, ShareIcon, SmileIcon } from './Icons'
+import { CanvasIcon, DotsIcon, HashIcon, MicIcon, MonitorIcon, PlusIcon, ReplyIcon, ShareIcon, SmileIcon } from './Icons'
 
 type ChatProps = {
   conversation: Conversation
@@ -28,11 +28,16 @@ export function Chat({
   const openCanvas = activeCanvasId ? CANVASES[activeCanvasId] : undefined
 
   return (
-    <section className="grok-chat">
+    <main id="main-content" className="grok-chat" tabIndex={-1}>
       <header className="chat-header">
         <div className="chat-header__identity">
-          <Avatar agent={conversation.agent} size={14} />
-          <h1>{conversation.title}</h1>
+          <span aria-hidden="true">
+            <ConversationGlyph conversation={conversation} />
+          </span>
+          <div className="chat-header__titles">
+            <h1>{conversation.title}</h1>
+            <p className="chat-header__parent">{conversation.parentTitle}</p>
+          </div>
         </div>
         <div className="chat-header__actions">
           {headerCanvas ? (
@@ -92,7 +97,7 @@ export function Chat({
           </IconButton>
         </div>
       </div>
-    </section>
+    </main>
   )
 }
 
@@ -222,6 +227,19 @@ function Inline({
       )
     default: {
       const exhaustive: never = token
+      return exhaustive
+    }
+  }
+}
+
+function ConversationGlyph({ conversation }: { conversation: Conversation }) {
+  switch (conversation.kind) {
+    case 'channel':
+      return <HashIcon className="chat-header__hash" />
+    case 'agent':
+      return <Avatar agent={conversation.agent} size={22} />
+    default: {
+      const exhaustive: never = conversation.kind
       return exhaustive
     }
   }

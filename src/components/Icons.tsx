@@ -166,6 +166,41 @@ export function ChevronDownIcon({ className }: IconProps) {
   )
 }
 
+export function HashIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M5 9h14" />
+      <path d="M5 15h14" />
+      <path d="m9.5 4-2 16" />
+      <path d="m16.5 4-2 16" />
+    </Icon>
+  )
+}
+
+export function FolderIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.2c.3 0 .6.1.8.3l1.3 1.2c.2.2.5.3.8.3H19a1.5 1.5 0 0 1 1.5 1.5V18A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18Z" />
+    </Icon>
+  )
+}
+
+export function CloudIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M7.2 17.5h9.3a3.7 3.7 0 0 0 .5-7.35 5 5 0 0 0-9.6-1.1A3.6 3.6 0 0 0 7.2 17.5Z" />
+    </Icon>
+  )
+}
+
+export function CheckIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="m5.5 12.5 4 4 9-9" />
+    </Icon>
+  )
+}
+
 export function FileIcon({ className }: IconProps) {
   return (
     <Icon className={className}>

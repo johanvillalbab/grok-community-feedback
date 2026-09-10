@@ -1,4 +1,12 @@
-import type { AgentKey, Conversation, FeedItem, WorkspaceCanvas, WorkspaceFile } from './types'
+import type {
+  AgentKey,
+  Conversation,
+  FeedItem,
+  NavGroup,
+  Workspace,
+  WorkspaceCanvas,
+  WorkspaceFile,
+} from './types'
 
 export const CURRENT_USER = {
   name: 'Sho V.',
@@ -479,118 +487,202 @@ const aboutCanvasChip = { type: 'canvas' as const, canvasId: 'about-launch' }
 const feedbackCanvasChip = { type: 'canvas' as const, canvasId: 'feedback-map' }
 const planCanvasChip = { type: 'canvas' as const, canvasId: 'about-plan' }
 
-export const CONVERSATIONS: Conversation[] = [
+type ThreadDraft = {
+  id: string
+  title: string
+  preview: string
+  time: string
+  unread?: boolean
+}
+
+function agentGroup(
+  agent: AgentKey,
+  threads: ThreadDraft[],
+  extras?: { stacked?: boolean; stackPlus?: number },
+): NavGroup {
+  const name = AGENT_META[agent].label
+  return {
+    id: `agent-${agent}`,
+    kind: 'agent',
+    name,
+    agent,
+    stacked: extras?.stacked,
+    stackPlus: extras?.stackPlus,
+    threads: threads.map((thread) => ({
+      id: thread.id,
+      kind: 'agent',
+      agent,
+      title: thread.title,
+      parentTitle: name,
+      preview: thread.preview,
+      time: thread.time,
+      unread: Boolean(thread.unread),
+      stacked: extras?.stacked,
+      stackPlus: extras?.stackPlus,
+    })),
+  }
+}
+
+function channelGroup(
+  slug: string,
+  name: string,
+  agent: AgentKey,
+  threads: ThreadDraft[],
+): NavGroup {
+  const parentTitle = `#${name}`
+  return {
+    id: `channel-${slug}`,
+    kind: 'channel',
+    name,
+    agent,
+    threads: threads.map((thread) => ({
+      id: thread.id,
+      kind: 'channel',
+      agent,
+      title: thread.title,
+      parentTitle,
+      preview: thread.preview,
+      time: thread.time,
+      unread: Boolean(thread.unread),
+    })),
+  }
+}
+
+export const WORKSPACES: Workspace[] = [
   {
-    id: 'is-1',
-    agent: 'is',
-    title: 'Core · Engineering',
-    preview: 'Full-stack Engineer: If in the #…',
-    time: '',
-    unread: true,
-    stacked: true,
-    stackPlus: 4,
+    id: 'atlas',
+    name: 'Atlas',
+    source: 'local',
+    agents: [
+      agentGroup('is', [
+        { id: 'is-1', title: 'Semantic pattern', preview: 'Full-stack Engineer: If in the #…', time: '1h', unread: true },
+        { id: 'is-2', title: 'Accept header', preview: 'Markdown negotiation is live.', time: '2d' },
+      ], { stacked: true, stackPlus: 4 }),
+      agentGroup('content', [
+        { id: 'content-1', title: 'Voice lock', preview: 'Frontend is still without acc…', time: '2h', unread: true },
+        { id: 'content-2', title: 'Community copy', preview: 'Dropped the “it is not X” contrast.', time: '2d' },
+      ]),
+      agentGroup('visual', [
+        { id: 'visual-1', title: 'Type wire BO-B4', preview: 'Content left layout GO and now…', time: '3h', unread: true },
+        { id: 'visual-2', title: 'Home radius', preview: 'Gutter matches the contract.', time: '5d' },
+      ]),
+      agentGroup('design', [
+        { id: 'design-1', title: 'About launch', preview: 'Wrote to Visual Designer: Lat…', time: '18:25' },
+        { id: 'design-2', title: 'Canvas view integration', preview: 'Status without rereading the thread.', time: '1d' },
+        { id: 'design-3', title: 'UI replica preview', preview: 'File opens beside chat.', time: '4d' },
+      ]),
+      agentGroup('craft', [
+        { id: 'craft-1', title: 'Component contract', preview: 'Design Engineer: Aligned with D…', time: '18:22' },
+        { id: 'craft-2', title: 'Token pass', preview: 'Accent stays on CTAs only.', time: '6d' },
+      ], { stacked: true, stackPlus: 2 }),
+      agentGroup('masterclass', [
+        { id: 'masterclass-1', title: 'Soft 15', preview: 'CEO: Closed. Soft 15 on Sep 15 …', time: '18:13' },
+        { id: 'masterclass-2', title: 'Cohort brief', preview: 'Second sitting holds 24 seats.', time: '1w' },
+      ], { stacked: true, stackPlus: 2 }),
+      agentGroup('ceo', [
+        { id: 'ceo-1', title: 'Launch window', preview: 'Message from Product Manager: OK.', time: '18:04' },
+        { id: 'ceo-2', title: 'Board note', preview: 'About complements Home. Do not repeat.', time: '3d' },
+      ]),
+      agentGroup('pm', [
+        { id: 'pm-1', title: 'About brief', preview: 'Message from Community Man…', time: '4h', unread: true },
+        { id: 'pm-2', title: 'Ship checklist', preview: 'Semantic and Content still owe a pass.', time: '1d' },
+      ]),
+      agentGroup('community', [
+        { id: 'community-1', title: 'Preview request', preview: 'Message from Product Manager…', time: '5h' },
+        { id: 'community-2', title: 'Feedback clusters', preview: '47 notes into four opportunities.', time: '2w' },
+      ]),
+      agentGroup('growth', [
+        { id: 'growth-1', title: 'Launch teaser', preview: 'Message from Product Manager…', time: '6h', unread: true },
+        { id: 'growth-2', title: 'Waitlist copy', preview: 'One promise. No countdown.', time: '1w' },
+      ]),
+      agentGroup('fullstack', [
+        { id: 'fullstack-1', title: 'About PR #5', preview: 'Message from Full-Stack Engineer…', time: '40m', unread: true },
+        { id: 'fullstack-2', title: 'Chip wiring', preview: 'File and canvas chips share openers.', time: '3d' },
+      ]),
+      agentGroup('marketing', [
+        { id: 'marketing-1', title: 'About phrases', preview: 'Message from Product Marketin…', time: '18:02' },
+        { id: 'marketing-2', title: 'Launch page', preview: 'Hero stays under 12 words.', time: '4d' },
+      ]),
+      agentGroup('org', [
+        { id: 'org-1', title: 'Lead to launch', preview: 'Lead to launch…', time: '18:02' },
+        { id: 'org-2', title: 'Owner map', preview: 'Six bots on the About path.', time: '1w' },
+      ]),
+    ],
+    channels: [
+      channelGroup('about', 'about', 'design', [
+        { id: 'ch-about-1', title: 'Component contract', preview: 'Source of truth before any code.', time: '2h', unread: true },
+        { id: 'ch-about-2', title: 'Voice lock', preview: 'UI-PHRASES.md is the copy source.', time: '1d' },
+        { id: 'ch-about-3', title: 'Type wire', preview: 'BO-B4 stands. Do not invent blocks.', time: '3d' },
+      ]),
+      channelGroup('community', 'community', 'community', [
+        { id: 'ch-community-1', title: 'Feedback map', preview: 'Preview is still the loudest ask.', time: '8h' },
+        { id: 'ch-community-2', title: 'Office hours', preview: 'Next sitting Tuesday 16:00.', time: '5d' },
+      ]),
+      channelGroup('launch', 'launch', 'pm', [
+        { id: 'ch-launch-1', title: 'Ship path', preview: 'PR #5 is open. Semantic is next.', time: '1h', unread: true },
+        { id: 'ch-launch-2', title: 'Go / no-go', preview: 'Content wants a last live pass.', time: '2d' },
+      ]),
+    ],
   },
   {
-    id: 'content-1',
-    agent: 'content',
-    title: 'Content & Brand Specialist',
-    preview: 'Frontend is still without acc…',
-    time: '',
-    unread: true,
+    id: 'masterclass',
+    name: 'Masterclass',
+    source: 'cloud',
+    agents: [
+      agentGroup('masterclass', [
+        { id: 'mc-core-1', title: 'Second sitting', preview: 'Soft 15 on Sep 15 still holds.', time: '3h', unread: true },
+        { id: 'mc-core-2', title: 'Room setup', preview: '24 seats. No overflow stream.', time: '2d' },
+      ], { stacked: true, stackPlus: 2 }),
+      agentGroup('ceo', [
+        { id: 'mc-ceo-1', title: 'Guest close', preview: 'Keep the ending on the work, not the brand.', time: '1d' },
+      ]),
+      agentGroup('content', [
+        { id: 'mc-content-1', title: 'Session phrases', preview: 'Approved lines for the intro and close.', time: '4d' },
+        { id: 'mc-content-2', title: 'Clip titles', preview: 'One claim per clip. No teasers.', time: '1w' },
+      ]),
+    ],
+    channels: [
+      channelGroup('cohort', 'cohort', 'masterclass', [
+        { id: 'ch-cohort-1', title: 'Roster', preview: '22 confirmed. 2 on the waitlist.', time: '6h' },
+        { id: 'ch-cohort-2', title: 'Prep pack', preview: 'Contract + phrases landed yesterday.', time: '2d' },
+      ]),
+      channelGroup('office-hours', 'office-hours', 'ceo', [
+        { id: 'ch-hours-1', title: 'Tuesday slot', preview: 'Questions stay on the About path.', time: '1d', unread: true },
+      ]),
+    ],
   },
   {
-    id: 'visual-1',
-    agent: 'visual',
-    title: 'Visual Designer',
-    preview: 'Content left layout GO and now…',
-    time: '',
-    unread: true,
-  },
-  {
-    id: 'design-1',
-    agent: 'design',
-    title: 'Design Engineer',
-    preview: 'Wrote to Visual Designer: Lat…',
-    time: '18:25',
-    unread: false,
-  },
-  {
-    id: 'craft-1',
-    agent: 'craft',
-    title: 'Core · Craft',
-    preview: 'Design Engineer: Aligned with D…',
-    time: '18:22',
-    unread: false,
-    stacked: true,
-    stackPlus: 2,
-  },
-  {
-    id: 'masterclass-1',
-    agent: 'masterclass',
-    title: 'Core · Masterclass Second …',
-    preview: 'CEO: Closed. Soft 15 on Sep 15 …',
-    time: '18:13',
-    unread: false,
-    stacked: true,
-    stackPlus: 2,
-  },
-  {
-    id: 'ceo-1',
-    agent: 'ceo',
-    title: 'CEO',
-    preview: 'Message from Product Manager: OK.',
-    time: '18:04',
-    unread: false,
-  },
-  {
-    id: 'pm-1',
-    agent: 'pm',
-    title: 'Product Manager',
-    preview: 'Message from Community Man…',
-    time: '',
-    unread: true,
-  },
-  {
-    id: 'community-1',
-    agent: 'community',
-    title: 'Community Manager',
-    preview: 'Message from Product Manager…',
-    time: '',
-    unread: false,
-  },
-  {
-    id: 'growth-1',
-    agent: 'growth',
-    title: 'Growth Marketer',
-    preview: 'Message from Product Manager…',
-    time: '',
-    unread: true,
-  },
-  {
-    id: 'fullstack-1',
-    agent: 'fullstack',
-    title: 'Full-Stack Engineer',
-    preview: 'Message from Full-Stack Engineer…',
-    time: '',
-    unread: true,
-  },
-  {
-    id: 'marketing-1',
-    agent: 'marketing',
-    title: 'Product Marketing Spec…',
-    preview: 'Message from Product Marketin…',
-    time: '18:02',
-    unread: false,
-  },
-  {
-    id: 'org-1',
-    agent: 'org',
-    title: 'Org',
-    preview: 'Lead to launch…',
-    time: '18:02',
-    unread: false,
+    id: 'craft',
+    name: 'Craft Lab',
+    source: 'local',
+    agents: [
+      agentGroup('craft', [
+        { id: 'lab-craft-1', title: 'Crit notes', preview: 'Radius and gutter only. No new primitives.', time: '20m', unread: true },
+        { id: 'lab-craft-2', title: 'Token lint', preview: 'Muted text fails on #141414 cards.', time: '2d' },
+      ], { stacked: true, stackPlus: 2 }),
+      agentGroup('design', [
+        { id: 'lab-design-1', title: 'Chip states', preview: 'Active chip needs a name, not only color.', time: '1d' },
+        { id: 'lab-design-2', title: 'Preview width', preview: 'Snap to 440 unless a canvas is open.', time: '5d' },
+      ]),
+      agentGroup('visual', [
+        { id: 'lab-visual-1', title: 'Avatar shapes', preview: 'Tell agents apart before reading the name.', time: '3d' },
+      ]),
+    ],
+    channels: [
+      channelGroup('crit', 'crit', 'craft', [
+        { id: 'ch-crit-1', title: 'Today', preview: 'Three files. Ten minutes each.', time: '45m', unread: true },
+        { id: 'ch-crit-2', title: 'Last week', preview: 'Home radius closed. About still open.', time: '1w' },
+      ]),
+      channelGroup('tokens', 'tokens', 'visual', [
+        { id: 'ch-tokens-1', title: 'Accent lock', preview: 'Pink only on primary actions.', time: '4d' },
+      ]),
+    ],
   },
 ]
+
+export const CONVERSATIONS: Conversation[] = WORKSPACES.flatMap((workspace) =>
+  [...workspace.agents, ...workspace.channels].flatMap((group) => group.threads),
+)
 
 export const FEEDS: Record<string, FeedItem[]> = {
   'design-1': [
@@ -751,4 +843,5 @@ for (const conversation of CONVERSATIONS) {
   }
 }
 
+export const DEFAULT_WORKSPACE_ID = 'atlas'
 export const DEFAULT_CONVERSATION_ID = 'design-1'

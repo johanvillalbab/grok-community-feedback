@@ -107,6 +107,9 @@ type BotFaceProps = {
 }
 
 function BotFace({ shape, color, size, label, decorative }: BotFaceProps) {
+  const face = opticalScale(shape)
+  const eyes = size < 20 ? 1.12 : size >= 28 ? 1.08 : 1
+
   return (
     <svg
       width={size}
@@ -117,10 +120,16 @@ function BotFace({ shape, color, size, label, decorative }: BotFaceProps) {
       aria-hidden={decorative ? true : undefined}
       aria-label={decorative ? undefined : label}
     >
-      <g fill={color} stroke={color} strokeWidth={shapeStroke(shape)} strokeLinejoin="round">
+      <g
+        fill={color}
+        stroke={color}
+        strokeWidth={shapeStroke(shape)}
+        strokeLinejoin="round"
+        transform={face === 1 ? undefined : `translate(20 20) scale(${face}) translate(-20 -20)`}
+      >
         <BotBody shape={shape} />
       </g>
-      <g transform="translate(20 20.2) rotate(-26)" fill="#141414">
+      <g transform={`translate(20 20.2) rotate(-26) scale(${eyes})`} fill="#141414">
         <ellipse cx="-3.85" cy="0" rx="1.42" ry="3.35" />
         <ellipse cx="3.85" cy="0" rx="1.42" ry="3.35" />
       </g>
@@ -130,8 +139,8 @@ function BotFace({ shape, color, size, label, decorative }: BotFaceProps) {
 
 function BotBody({ shape }: { shape: BotShapeId }) {
   switch (shape) {
-    case 'cercle':
-      return <circle cx="20" cy="20" r="16.4" strokeWidth={0} />
+      case 'cercle':
+      return <circle cx="20" cy="20" r="18" strokeWidth={0} />
     case 'galet':
       return (
         <path d="M20 4.2C29.4 4.6 36.4 11.4 35.2 21.2C34.2 30.4 26.6 35.6 18.4 34.8C9.2 33.8 4.4 25.8 5.8 16.6C7.1 8.2 13.2 3.9 20 4.2Z" />
@@ -152,6 +161,26 @@ function BotBody({ shape }: { shape: BotShapeId }) {
       return (
         <path d="M20 3.6C20 3.6 8.4 16.4 8.4 25.2C8.4 31.6 13.6 36 20 36C26.4 36 31.6 31.6 31.6 25.2C31.6 16.4 20 3.6 20 3.6Z" />
       )
+    default: {
+      const exhaustive: never = shape
+      return exhaustive
+    }
+  }
+}
+
+function opticalScale(shape: BotShapeId) {
+  switch (shape) {
+    case 'triangle':
+    case 'hexagone':
+      return 1.22
+    case 'capsule':
+      return 1.12
+    case 'cercle':
+    case 'squircle':
+    case 'galet':
+    case 'nuage':
+    case 'goutte':
+      return 1.06
     default: {
       const exhaustive: never = shape
       return exhaustive

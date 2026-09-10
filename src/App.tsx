@@ -3,11 +3,13 @@ import { CanvasPanel } from './components/CanvasPanel'
 import { Chat } from './components/Chat'
 import { PreviewPanel } from './components/PreviewPanel'
 import { Sidebar } from './components/Sidebar'
-import { CANVASES, CONVERSATIONS, DEFAULT_CONVERSATION_ID, FEEDS, FILES } from './data'
+import { CANVASES, DEFAULT_CONVERSATION_ID, DEFAULT_WORKSPACE_ID, FEEDS, FILES } from './data'
 import { defaultCanvasWidth, defaultPreviewWidth, defaultSidebarWidth } from './lib/preview-layout'
+import { findThread, firstThread, getWorkspace } from './lib/workspace-nav'
 import type { OpenArtifact } from './types'
 
 export default function App() {
+  const [workspaceId, setWorkspaceId] = useState(DEFAULT_WORKSPACE_ID)
   const [activeId, setActiveId] = useState(DEFAULT_CONVERSATION_ID)
   const [artifact, setArtifact] = useState<OpenArtifact | null>(null)
   const [previewWidth, setPreviewWidth] = useState(defaultPreviewWidth)
@@ -15,9 +17,10 @@ export default function App() {
   const [liveMessage, setLiveMessage] = useState('')
   const openerRef = useRef<HTMLElement | null>(null)
 
+  const workspace = useMemo(() => getWorkspace(workspaceId), [workspaceId])
   const conversation = useMemo(
-    () => CONVERSATIONS.find((item) => item.id === activeId) ?? CONVERSATIONS[0],
-    [activeId],
+    () => findThread(workspace, activeId) ?? firstThread(workspace),
+    [activeId, workspace],
   )
   const feed = FEEDS[conversation.id] ?? []
   const file = artifact?.kind === 'file' ? FILES[artifact.id] : undefined
@@ -67,16 +70,26 @@ export default function App() {
 
   return (
     <div className={artifact ? 'grok-app grok-app--preview' : 'grok-app'}>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <Sidebar
-        conversations={CONVERSATIONS}
+        workspace={workspace}
         activeId={conversation.id}
         width={sidebarWidth}
         onWidthChange={setSidebarWidth}
         onAnnounce={setLiveMessage}
         onSelect={(id) => {
-          setActiveId(id)
+          const next = findThread(workspace, id) ?? firstThread(workspace)
+          setActiveId(next.id)
           setArtifact(null)
-          setLiveMessage('')
+          setLiveMessage(`${next.parentTitle}: ${next.title}`)
+        }}
+        onWorkspaceChange={(id) => {
+          const nextWorkspace = getWorkspace(id)
+          const nextThread = findThread(nextWorkspace, activeId) ?? firstThread(nextWorkspace)
+          setWorkspaceId(nextWorkspace.id)
+          setActiveId(nextThread.id)
+          setArtifact(null)
+          setLiveMessage(`Workspace: ${nextWorkspace.name}. ${nextThread.parentTitle}: ${nextThread.title}`)
         }}
       />
       <Chat

@@ -1,10 +1,11 @@
-const APP_SCALE = 1.2
+const APP_SCALE = 1.3
 const CHAT_MIN = 340
 const PREVIEW_MIN = 280
-export const SIDEBAR_EXPANDED = 203
+export const BOT_FACE = 32
+export const SIDEBAR_EXPANDED = 256
 export const SIDEBAR_COLLAPSED = 56
 export const SIDEBAR_SNAP = 140
-export const SIDEBAR_MAX = 280
+export const SIDEBAR_MAX = 300
 const SIDEBAR_WIDTH = SIDEBAR_EXPANDED
 
 export function defaultPreviewWidth() {

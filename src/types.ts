@@ -131,15 +131,38 @@ export type FeedItem =
     }
   | { kind: 'new'; id: string }
 
+export type ThreadKind = 'agent' | 'channel'
+export type WorkspaceSource = 'local' | 'cloud'
+
 export type Conversation = {
   id: string
+  kind: ThreadKind
   agent: AgentKey
   title: string
+  parentTitle: string
   preview: string
   time: string
   unread: boolean
   stacked?: boolean
   stackPlus?: number
+}
+
+export type NavGroup = {
+  id: string
+  kind: ThreadKind
+  name: string
+  agent: AgentKey
+  stacked?: boolean
+  stackPlus?: number
+  threads: Conversation[]
+}
+
+export type Workspace = {
+  id: string
+  name: string
+  source: WorkspaceSource
+  agents: NavGroup[]
+  channels: NavGroup[]
 }
 
 export type WorkspaceFile = {

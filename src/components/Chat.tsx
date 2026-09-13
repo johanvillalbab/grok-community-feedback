@@ -348,17 +348,6 @@ function FeedRow({
     case 'message':
       return (
         <article className={`grok-message grok-message--${item.id}`}>
-          <div className="grok-message__actions">
-            <IconButton label="Add reaction" onClick={onReaction}>
-              <SmileIcon />
-            </IconButton>
-            <IconButton label="Reply" onClick={onReply}>
-              <ReplyIcon />
-            </IconButton>
-            <IconButton label="More actions" onClick={onMore}>
-              <DotsIcon />
-            </IconButton>
-          </div>
           <div className="grok-message__content">
             {item.blocks.map((block, index) => (
               <p key={index}>
@@ -385,6 +374,17 @@ function FeedRow({
                 ))}
               </p>
             ) : null}
+          </div>
+          <div className="grok-message__actions">
+            <IconButton label="Add reaction" onClick={onReaction}>
+              <SmileIcon />
+            </IconButton>
+            <IconButton label="Reply" onClick={onReply}>
+              <ReplyIcon />
+            </IconButton>
+            <IconButton label="More actions" onClick={onMore}>
+              <DotsIcon />
+            </IconButton>
           </div>
         </article>
       )

@@ -11,6 +11,7 @@ import { SettingsView } from './components/SettingsView'
 import { Sidebar } from './components/Sidebar'
 import { WorkspaceModals } from './components/WorkspaceModals'
 import { listingById } from './workspace-data'
+import { SIDEBAR_EXPANDED } from './lib/preview-layout'
 import { usePhoneLayout } from './lib/viewport'
 import { useWorkspace } from './lib/use-workspace'
 
@@ -19,7 +20,7 @@ export default function App() {
   const phone = usePhoneLayout()
   const previewOpen = Boolean(workspace.file || workspace.canvas)
   const sheetOpen = workspace.surface.kind !== 'chat'
-  const { navOpen, closeNav } = workspace
+  const { navOpen, closeNav, setSidebarWidth } = workspace
 
   useEffect(() => {
     document.body.classList.toggle('is-phone', phone)
@@ -28,6 +29,11 @@ export default function App() {
       document.body.classList.remove('nav-lock')
     }
   }, [phone, navOpen])
+
+  useEffect(() => {
+    if (phone) return
+    setSidebarWidth(SIDEBAR_EXPANDED)
+  }, [phone, setSidebarWidth])
 
   useEffect(() => {
     if (!phone || !navOpen) return

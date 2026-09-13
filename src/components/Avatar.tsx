@@ -47,14 +47,14 @@ export function AvatarStack({ agents, size = 16 }: { agents: AgentKey[]; size?: 
 
 function UserPhoto({ size, label }: { size: number; label: string }) {
   return (
-    <img
-      src="/sho.png"
-      alt={label}
-      width={size}
-      height={size}
-      className="user-photo"
-      style={{ width: size, height: size }}
-    />
+    <span
+      className="user-photo user-photo--initials"
+      role="img"
+      aria-label={label}
+      style={{ width: size, height: size, fontSize: Math.max(8, Math.round(size * 0.38)) }}
+    >
+      SV
+    </span>
   )
 }
 

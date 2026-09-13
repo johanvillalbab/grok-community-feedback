@@ -20,6 +20,12 @@ I built it with the same care I bring to my role as a SpaceX and AI community am
 - Cursor-style Canvas panels for visualizing project data and connected flows beside the conversation
 - Distinct bot identities that make multi-agent conversations easier to scan
 - Fictional sample content that demonstrates the flow without exposing private information
+- A Goals board where community and product plans have owners, status, and progress
+- An Activity log that shows what bots are doing in the background, including sample approvals
+- Side rooms so a theme can fork off the main thread without losing it
+- Autonomy and permission settings for each bot, saved in this browser only
+- Artifacts plus a Proactive digest that suggests next moves from sample feedback clusters
+- Mock instrumentation events that appear in the Activity log after you use the matching screen
 
 ## Community request: Canvas
 
@@ -40,6 +46,19 @@ npm run dev
 
 Open the local URL printed by Vite.
 
+## Demo path
+
+Everything below is mock data. Nothing is sent to a network.
+
+1. Start in **Atlas → Design Engineer → About launch**. Send a note, open a file chip, and use **Main / Semantic review / Voice lock** to switch the main thread and a side room.
+2. Open **Goals** in the sidebar (or the flag in the chat header, or the goal chip in the thread). Pick **Ship About as identity** and open its related thread or plan canvas.
+3. Click the Design Engineer avatar in the chat header, then **Activity log**. Approve or dismiss a waiting item. Filter by bot.
+4. Open **Digest**, then a card’s artifact or goal. **Artifacts** lists the same canvases, files, and the Preview cluster brief.
+5. Open **Sho V.** → **Autonomy** and **Permissions**. Change a bot’s level or a toggle, refresh, and confirm it stays. **Marketplace** installs sample bots only.
+6. Instrumentation walk (configured → used → saw what happened): create a sample goal, change autonomy, toggle a permission, switch a thread or workspace, open a side room, open a file or canvas, open Digest, then open **Activity**. Filter **Events**. The log shows `goal_created`, `autonomy_changed`, `permission_toggled`, `context_changed`, `side_chat_opened`, `artifact_opened`, `digest_viewed`, and `activity_log_opened`.
+
+Other wired surfaces: **New thread** (`+`), **Channels**, **Share**, **Open in desktop**, **Add file**, **Voice message**, reactions, reply, and message more-actions. Search empty states offer Goals and Digest.
+
 ## Commands
 
 ```bash
@@ -53,10 +72,11 @@ npm run preview  # Preview the production build locally
 
 ```text
 src/
-  components/    Chat, file preview, Canvas panels, and custom icons
-  lib/           Shared panel, keyboard, and graph-layout utilities
-  App.tsx        Workspace state and panel composition
+  components/    Chat, sidebar, Goals, Activity, Digest, settings, and panels
+  lib/           Workspace state, persistence, panel, and keyboard utilities
+  App.tsx        Workspace surface composition
   data.ts        Fictional conversations, files, canvases, and bot metadata
+  workspace-data.ts  Sample goals, activity, rooms, digest, and permissions
   index.css      Layout, visual tokens, and interaction states
 docs/
   images/        Project screenshots

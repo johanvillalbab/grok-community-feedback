@@ -16,6 +16,8 @@ type ActivityLogProps = {
   onOpenFile: (fileId: string) => void
   onOpenGoal: (goalId: string) => void
   onSetApproval: (id: string, state: ApprovalState) => void
+  onOpenNav?: () => void
+  onBack?: () => void
 }
 
 export function ActivityLog({
@@ -29,6 +31,8 @@ export function ActivityLog({
   onOpenFile,
   onOpenGoal,
   onSetApproval,
+  onOpenNav,
+  onBack,
 }: ActivityLogProps) {
   const [eventsOnly, setEventsOnly] = useState(false)
   const workspaceItems = items.filter((item) => item.workspaceId === workspaceId)
@@ -44,6 +48,8 @@ export function ActivityLog({
       title={agent ? `${AGENT_META[agent].label} activity` : 'Activity'}
       parent={`${workspaceName} · background work (sample)`}
       icon={<PulseIcon />}
+      onOpenNav={onOpenNav}
+      onBack={onBack}
       actions={agent ? (
         <button
           type="button"
@@ -91,8 +97,12 @@ export function ActivityLog({
       </div>
       {visible.length === 0 ? (
         <div className="workspace-empty">
-          <h2>No sample activity here</h2>
-          <p>Bots in this workspace have not posted a background action in the mock log.</p>
+          <h2>{eventsOnly ? 'No events yet this session' : 'No sample activity here'}</h2>
+          <p>
+            {eventsOnly
+              ? 'Walk the loop to write instrumentation here: create a Goal, change Autonomy or a permission, then open Digest. The log keeps goal_created, autonomy_changed, permission_toggled, and digest_viewed.'
+              : 'Bots in this workspace have not posted a background action in the mock log.'}
+          </p>
         </div>
       ) : (
         <ol className="activity-list">

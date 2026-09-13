@@ -8,33 +8,44 @@ import { WorkspaceScreen } from './WorkspaceScreen'
 type SettingsViewProps = {
   section: SettingsSection
   permissions: Record<AgentKey, BotPermission>
+  notifyGlobal: boolean
   onSection: (section: SettingsSection) => void
   onAutonomy: (agent: AgentKey, autonomy: AutonomyLevel) => void
   onCapability: (agent: AgentKey, capability: BotCapability) => void
   onApproval: (agent: AgentKey) => void
+  onNotifyGlobal: (value: boolean) => void
   onOpenActivity: (agent: AgentKey) => void
+  onOpenNav?: () => void
+  onBack?: () => void
 }
 
 const SECTIONS: Array<{ id: SettingsSection; label: string }> = [
   { id: 'profile', label: 'Profile' },
   { id: 'autonomy', label: 'Autonomy' },
   { id: 'permissions', label: 'Permissions' },
+  { id: 'notifications', label: 'Notifications' },
 ]
 
 export function SettingsView({
   section,
   permissions,
+  notifyGlobal,
   onSection,
   onAutonomy,
   onCapability,
   onApproval,
+  onNotifyGlobal,
   onOpenActivity,
+  onOpenNav,
+  onBack,
 }: SettingsViewProps) {
   return (
     <WorkspaceScreen
       title="Workspace settings"
       parent="Configurable sample controls. Saved in this browser."
       icon={<ShieldIcon />}
+      onOpenNav={onOpenNav}
+      onBack={onBack}
     >
       <div className="settings-tabs" role="tablist" aria-label="Settings sections">
         {SECTIONS.map((item) => (
@@ -50,15 +61,58 @@ export function SettingsView({
           </button>
         ))}
       </div>
-      {section === 'profile' ? <ProfilePane onOpenActivity={onOpenActivity} /> : null}
-      {section === 'autonomy' ? (
-        <AutonomyPane permissions={permissions} onAutonomy={onAutonomy} onApproval={onApproval} />
-      ) : null}
-      {section === 'permissions' ? (
-        <PermissionsPane permissions={permissions} onCapability={onCapability} />
-      ) : null}
+      {renderSection(section, {
+        permissions,
+        notifyGlobal,
+        onAutonomy,
+        onCapability,
+        onApproval,
+        onNotifyGlobal,
+        onOpenActivity,
+      })}
     </WorkspaceScreen>
   )
+}
+
+function renderSection(
+  section: SettingsSection,
+  props: {
+    permissions: Record<AgentKey, BotPermission>
+    notifyGlobal: boolean
+    onAutonomy: (agent: AgentKey, autonomy: AutonomyLevel) => void
+    onCapability: (agent: AgentKey, capability: BotCapability) => void
+    onApproval: (agent: AgentKey) => void
+    onNotifyGlobal: (value: boolean) => void
+    onOpenActivity: (agent: AgentKey) => void
+  },
+) {
+  switch (section) {
+    case 'profile':
+      return <ProfilePane onOpenActivity={props.onOpenActivity} />
+    case 'autonomy':
+      return (
+        <AutonomyPane
+          permissions={props.permissions}
+          onAutonomy={props.onAutonomy}
+          onApproval={props.onApproval}
+        />
+      )
+    case 'permissions':
+      return <PermissionsPane permissions={props.permissions} onCapability={props.onCapability} />
+    case 'notifications':
+      return (
+        <NotificationsPane
+          permissions={props.permissions}
+          notifyGlobal={props.notifyGlobal}
+          onNotifyGlobal={props.onNotifyGlobal}
+          onCapability={props.onCapability}
+        />
+      )
+    default: {
+      const exhaustive: never = section
+      return exhaustive
+    }
+  }
 }
 
 function ProfilePane({ onOpenActivity }: { onOpenActivity: (agent: AgentKey) => void }) {
@@ -83,7 +137,7 @@ function ProfilePane({ onOpenActivity }: { onOpenActivity: (agent: AgentKey) => 
         </div>
         <div>
           <dt>Notifications</dt>
-          <dd>In-app only. This build does not send mail.</dd>
+          <dd>In-app only. This build does not send mail. Use the Notifications tab for per-bot toggles.</dd>
         </div>
       </dl>
       <button type="button" className="ws-button" onClick={() => onOpenActivity('user')}>
@@ -125,7 +179,7 @@ function AutonomyPane({
                     {AGENT_META[agent].label}
                   </span>
                 </th>
-                <td>
+                <td data-label="Level">
                   <label className="sr-only" htmlFor={`autonomy-${agent}`}>Autonomy for {AGENT_META[agent].label}</label>
                   <select
                     id={`autonomy-${agent}`}
@@ -139,7 +193,7 @@ function AutonomyPane({
                     <option value="act">Act</option>
                   </select>
                 </td>
-                <td>
+                <td data-label="Approval">
                   <label className="settings-check">
                     <input
                       type="checkbox"
@@ -203,6 +257,55 @@ function PermissionsPane({
   )
 }
 
+function NotificationsPane({
+  permissions,
+  notifyGlobal,
+  onNotifyGlobal,
+  onCapability,
+}: {
+  permissions: Record<AgentKey, BotPermission>
+  notifyGlobal: boolean
+  onNotifyGlobal: (value: boolean) => void
+  onCapability: (agent: AgentKey, capability: BotCapability) => void
+}) {
+  return (
+    <div className="settings-pane">
+      <h2>Notifications</h2>
+      <p>Same account and workspace as a wide desktop window. This prototype only stores the preference here.</p>
+      <label className="settings-check settings-check--row">
+        <input
+          type="checkbox"
+          checked={notifyGlobal}
+          onChange={() => onNotifyGlobal(!notifyGlobal)}
+        />
+        Phone and in-app alerts for every bot
+      </label>
+      <p>Off means no bot notifies you when it finishes or needs input, including in this phone view.</p>
+      <h2>Per bot</h2>
+      <p>Get notified when this bot finishes or needs input. The same switch lives in Permissions.</p>
+      <ul className="settings-notify-list">
+        {WORKSPACE_BOTS.map((agent) => {
+          const row = permissions[agent]
+          return (
+            <li key={agent}>
+              <label className="settings-check settings-check--row">
+                <Avatar agent={agent} size={18} />
+                <span>{AGENT_META[agent].label}</span>
+                <input
+                  type="checkbox"
+                  checked={notifyGlobal && row.capabilities.notify}
+                  disabled={!notifyGlobal}
+                  onChange={() => onCapability(agent, 'notify')}
+                />
+              </label>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+
 function CapabilityCell({
   agent,
   capability,
@@ -215,7 +318,7 @@ function CapabilityCell({
   onCapability: (agent: AgentKey, capability: BotCapability) => void
 }) {
   return (
-    <td>
+    <td data-label={capabilityLabel(capability)}>
       <label className="settings-check">
         <span className="sr-only">{capabilityLabel(capability)} for {AGENT_META[agent].label}</span>
         <input type="checkbox" checked={checked} onChange={() => onCapability(agent, capability)} />

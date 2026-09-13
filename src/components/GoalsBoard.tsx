@@ -14,6 +14,8 @@ type GoalsBoardProps = {
   onCreate: () => void
   onOpenThread: (threadId: string) => void
   onOpenCanvas: (canvasId: string) => void
+  onOpenNav?: () => void
+  onBack?: () => void
 }
 
 export function GoalsBoard({
@@ -25,6 +27,8 @@ export function GoalsBoard({
   onCreate,
   onOpenThread,
   onOpenCanvas,
+  onOpenNav,
+  onBack,
 }: GoalsBoardProps) {
   const goals = [
     ...extraGoals.filter((goal) => goal.workspaceId === workspaceId),
@@ -37,6 +41,8 @@ export function GoalsBoard({
       title="Goals"
       parent={`${workspaceName} · sample roadmap`}
       icon={<FlagIcon />}
+      onOpenNav={onOpenNav}
+      onBack={onBack}
       actions={(
         <button type="button" className="ws-button ws-button--tiny" onClick={onCreate}>
           New sample goal

@@ -7,9 +7,10 @@ type ModalShellProps = {
   onClose: () => void
   children: ReactNode
   footer?: ReactNode
+  sheet?: boolean
 }
 
-export function ModalShell({ title, subtitle, onClose, children, footer }: ModalShellProps) {
+export function ModalShell({ title, subtitle, onClose, children, footer, sheet = false }: ModalShellProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -28,11 +29,11 @@ export function ModalShell({ title, subtitle, onClose, children, footer }: Modal
   }, [onClose])
 
   return (
-    <div className="ws-modal-root">
+    <div className={sheet ? 'ws-modal-root ws-modal-root--sheet' : 'ws-modal-root'}>
       <button type="button" className="ws-modal-backdrop" aria-label="Close dialog" onClick={onClose} />
       <div
         ref={dialogRef}
-        className="ws-modal"
+        className={sheet ? 'ws-modal ws-modal--sheet' : 'ws-modal'}
         role="dialog"
         aria-modal="true"
         aria-labelledby="ws-modal-title"

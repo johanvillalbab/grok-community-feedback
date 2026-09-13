@@ -30,6 +30,7 @@ export function useSidebarPanel({ onWidthChange, onAnnounce }: SidebarPanelOptio
       const panel = panelRef.current
       const app = panel?.parentElement
       if (!panel || !app) return
+      if (app.classList.contains('grok-app--phone')) return
       const previewWidth = readPreviewWidth(app)
       const next = clampSidebarWidth(panel.offsetWidth, app.clientWidth, previewWidth)
       setValueMax(maxSidebarWidth(app.clientWidth, previewWidth))

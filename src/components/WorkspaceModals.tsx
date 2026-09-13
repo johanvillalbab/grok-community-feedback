@@ -8,25 +8,37 @@ import { ModalShell } from './ModalShell'
 
 type WorkspaceModalsProps = {
   workspace: WorkspaceController
+  phone?: boolean
 }
 
-export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
+export function WorkspaceModals({ workspace, phone = false }: WorkspaceModalsProps) {
   const modal = workspace.modal
   if (!modal) return null
 
   switch (modal.kind) {
+    case 'compose':
+      return (
+        <ComposeModal
+          sheet={phone}
+          onClose={() => workspace.setModal(null)}
+          onThread={() => workspace.setModal({ kind: 'new-thread' })}
+          onGroup={() => workspace.setModal({ kind: 'new-room' })}
+          onGoal={() => workspace.setModal({ kind: 'new-goal' })}
+        />
+      )
     case 'new-goal':
       return (
         <NewGoalModal
+          sheet={phone}
           onClose={() => workspace.setModal(null)}
           onCreate={workspace.createGoal}
         />
       )
     case 'new-thread':
-      return <NewThreadModal workspace={workspace.workspace} onClose={() => workspace.setModal(null)} onCreate={workspace.createThread} />
+      return <NewThreadModal sheet={phone} workspace={workspace.workspace} onClose={() => workspace.setModal(null)} onCreate={workspace.createThread} />
     case 'share':
       return (
-        <ModalShell title="Share thread" subtitle="Sample share sheet. Nothing leaves this browser." onClose={() => workspace.setModal(null)}>
+        <ModalShell sheet={phone} title="Share thread" subtitle="Sample share sheet. Nothing leaves this browser." onClose={() => workspace.setModal(null)}>
           <p>Copy a fictional link for {workspace.conversation.title}.</p>
           <code className="ws-code">atlas://{workspace.workspace.id}/{workspace.conversation.id}</code>
           <p>Suggested readers: Product Manager, Community Manager, Design Engineer.</p>
@@ -34,13 +46,28 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
       )
     case 'desktop':
       return (
-        <ModalShell title="Open in desktop" subtitle="This prototype stays in the browser." onClose={() => workspace.setModal(null)}>
-          <p>A desktop build would reopen Atlas on {workspace.conversation.title} with the same mock files.</p>
-          <p>There is no native app in this repository. Use the workspace as it is.</p>
+        <ModalShell
+          sheet={phone}
+          title="Computer"
+          subtitle="Status, preview, and takeover. This prototype stays in the browser."
+          onClose={() => workspace.setModal(null)}
+        >
+          <p>The computer belongs to the bot. This thread shows three access levels without forcing you to supervise:</p>
+          <ol className="computer-levels">
+            <li><strong>Status.</strong> The header icon turns purple while the computer is active.</li>
+            <li><strong>Preview.</strong> On a wide window, open a file or canvas rail beside the conversation.</li>
+            <li><strong>Takeover.</strong> {phone ? 'On a phone, that preview becomes a full-screen sheet. Close it to return to the thread.' : 'When the bot needs help, the preview can grow to fill the window.'}</li>
+          </ol>
+          {phone ? (
+            <p className="computer-desktop-only">Computer updates are not available on this phone view. Use a desktop-width window to update, recover, or reset the mock computer.</p>
+          ) : (
+            <p>Computer updates stay on this wide window in the prototype. There is no recover or reset action yet.</p>
+          )}
+          <p>A native desktop app would reopen Atlas on {workspace.conversation.title} with the same mock files. There is no native app in this repository.</p>
         </ModalShell>
       )
     case 'add-file':
-      return <AddFileModal onClose={() => workspace.setModal(null)} onPick={(fileId) => {
+      return <AddFileModal sheet={phone} onClose={() => workspace.setModal(null)} onPick={(fileId) => {
         workspace.appendMessage(
           { threadId: workspace.conversation.id, roomId: workspace.activeRoomId ?? undefined },
           'Attached a sample file:',
@@ -50,7 +77,7 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
         workspace.setModal(null)
       }} />
     case 'voice':
-      return <VoiceModal onClose={() => workspace.setModal(null)} onInsert={(text) => {
+      return <VoiceModal sheet={phone} onClose={() => workspace.setModal(null)} onInsert={(text) => {
         workspace.appendMessage(
           { threadId: workspace.conversation.id, roomId: workspace.activeRoomId ?? undefined },
           text,
@@ -59,7 +86,7 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
       }} />
     case 'reaction':
       return (
-        <ModalShell title="Add reaction" onClose={() => workspace.setModal(null)}>
+        <ModalShell sheet={phone} title="Add reaction" onClose={() => workspace.setModal(null)}>
           <div className="reaction-row">
             {REACTIONS.map((item) => (
               <button key={item} type="button" className="reaction-pick" onClick={() => workspace.addReaction(modal.messageId, item)}>
@@ -72,6 +99,7 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
     case 'more':
       return (
         <MoreModal
+          sheet={phone}
           conversation={workspace.conversation}
           onClose={() => workspace.setModal(null)}
           onReply={() => {
@@ -83,10 +111,11 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
         />
       )
     case 'new-room':
-      return <RoomFormModal title="New side room" onClose={() => workspace.setModal(null)} onSubmit={workspace.createRoom} />
+      return <RoomFormModal sheet={phone} title="New group chat" onClose={() => workspace.setModal(null)} onSubmit={workspace.createRoom} />
     case 'rename-room':
       return (
         <RoomFormModal
+          sheet={phone}
           title="Rename side room"
           initialTitle={workspace.threadRooms.find((room) => room.id === modal.roomId)?.title ?? ''}
           onClose={() => workspace.setModal(null)}
@@ -96,6 +125,7 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
     case 'bot-detail':
       return (
         <BotDetailModal
+          sheet={phone}
           agent={modal.agent}
           rooms={workspace.rooms}
           onClose={() => workspace.setModal(null)}
@@ -112,6 +142,7 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
     case 'chip-ref':
       return (
         <ChipRefModal
+          sheet={phone}
           label={modal.label}
           onClose={() => workspace.setModal(null)}
           onOpenFile={(id) => {
@@ -122,7 +153,7 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
       )
     case 'external-link':
       return (
-        <ModalShell title={modal.title} subtitle="Fictional link. This app does not leave the workspace." onClose={() => workspace.setModal(null)}>
+        <ModalShell sheet={phone} title={modal.title} subtitle="Fictional link. This app does not leave the workspace." onClose={() => workspace.setModal(null)}>
           <p>The thread pointed at:</p>
           <code className="ws-code">{modal.href}</code>
           <p>Open the in-app sample instead of a live page.</p>
@@ -135,16 +166,63 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
   }
 }
 
+function ComposeModal({
+  sheet,
+  onClose,
+  onThread,
+  onGroup,
+  onGoal,
+}: {
+  sheet?: boolean
+  onClose: () => void
+  onThread: () => void
+  onGroup: () => void
+  onGoal: () => void
+}) {
+  return (
+    <ModalShell
+      sheet={sheet}
+      title="New"
+      subtitle="Organize without leaving the conversation."
+      onClose={onClose}
+    >
+      <ul className="ws-pick-list">
+        <li>
+          <button type="button" className="ws-pick" onClick={onThread}>
+            <strong>New thread</strong>
+            <span>Start a sample conversation under an agent or channel.</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" className="ws-pick" onClick={onGroup}>
+            <strong>New group chat</strong>
+            <span>Fork a side room from this thread. The main transcript stays put.</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" className="ws-pick" onClick={onGoal}>
+            <strong>New sample goal</strong>
+            <span>Add a plan item and write goal_created to Activity.</span>
+          </button>
+        </li>
+      </ul>
+    </ModalShell>
+  )
+}
+
 function NewGoalModal({
+  sheet,
   onClose,
   onCreate,
 }: {
+  sheet?: boolean
   onClose: () => void
   onCreate: (title: string) => void
 }) {
   const [title, setTitle] = useState('')
   return (
     <ModalShell
+      sheet={sheet}
       title="New sample goal"
       subtitle="Creates a mock goal and writes goal_created to the Activity log."
       onClose={onClose}
@@ -173,10 +251,12 @@ function NewGoalModal({
 }
 
 function NewThreadModal({
+  sheet,
   workspace,
   onClose,
   onCreate,
 }: {
+  sheet?: boolean
   workspace: Workspace
   onClose: () => void
   onCreate: (groupId: string, title: string) => void
@@ -187,6 +267,7 @@ function NewThreadModal({
 
   return (
     <ModalShell
+      sheet={sheet}
       title="New thread"
       subtitle="Creates a sample conversation in this workspace."
       onClose={onClose}
@@ -219,9 +300,9 @@ function NewThreadModal({
   )
 }
 
-function AddFileModal({ onClose, onPick }: { onClose: () => void; onPick: (fileId: string) => void }) {
+function AddFileModal({ sheet, onClose, onPick }: { sheet?: boolean; onClose: () => void; onPick: (fileId: string) => void }) {
   return (
-    <ModalShell title="Add file" subtitle="Attach a sample workspace file to this thread." onClose={onClose}>
+    <ModalShell sheet={sheet} title="Add file" subtitle="Attach a sample workspace file to this thread." onClose={onClose}>
       <ul className="ws-pick-list">
         {Object.values(FILES).map((file) => (
           <li key={file.id}>
@@ -236,9 +317,10 @@ function AddFileModal({ onClose, onPick }: { onClose: () => void; onPick: (fileI
   )
 }
 
-function VoiceModal({ onClose, onInsert }: { onClose: () => void; onInsert: (text: string) => void }) {
+function VoiceModal({ sheet, onClose, onInsert }: { sheet?: boolean; onClose: () => void; onInsert: (text: string) => void }) {
   return (
     <ModalShell
+      sheet={sheet}
       title="Voice message"
       subtitle="Sample capture. Nothing is recorded."
       onClose={onClose}
@@ -263,12 +345,14 @@ function VoiceModal({ onClose, onInsert }: { onClose: () => void; onInsert: (tex
 }
 
 function MoreModal({
+  sheet,
   conversation,
   onClose,
   onReply,
   onShare,
   onGoal,
 }: {
+  sheet?: boolean
   conversation: Conversation
   onClose: () => void
   onReply: () => void
@@ -276,7 +360,7 @@ function MoreModal({
   onGoal: () => void
 }) {
   return (
-    <ModalShell title="Message actions" subtitle={conversation.title} onClose={onClose}>
+    <ModalShell sheet={sheet} title="Message actions" subtitle={conversation.title} onClose={onClose}>
       <ul className="ws-pick-list">
         <li><button type="button" className="ws-pick" onClick={onReply}><strong>Reply in a side room</strong><span>Keep the main thread clear.</span></button></li>
         <li><button type="button" className="ws-pick" onClick={onShare}><strong>Share thread</strong><span>Open the sample share sheet.</span></button></li>
@@ -287,11 +371,13 @@ function MoreModal({
 }
 
 function RoomFormModal({
+  sheet,
   title,
   initialTitle = '',
   onClose,
   onSubmit,
 }: {
+  sheet?: boolean
   title: string
   initialTitle?: string
   onClose: () => void
@@ -301,6 +387,7 @@ function RoomFormModal({
   const [topic, setTopic] = useState('')
   return (
     <ModalShell
+      sheet={sheet}
       title={title}
       onClose={onClose}
       footer={(
@@ -322,12 +409,14 @@ function RoomFormModal({
 }
 
 function BotDetailModal({
+  sheet,
   agent,
   rooms,
   onClose,
   onActivity,
   onSettings,
 }: {
+  sheet?: boolean
   agent: AgentKey
   rooms: SideRoom[]
   onClose: () => void
@@ -337,7 +426,7 @@ function BotDetailModal({
   const meta = agent === 'user' ? { label: CURRENT_USER.name, color: AGENT_META.user.color } : AGENT_META[agent]
   const owned = rooms.filter((room) => room.owner === agent && room.status === 'open')
   return (
-    <ModalShell title={meta.label} subtitle="Bot detail · sample identity" onClose={onClose}>
+    <ModalShell sheet={sheet} title={meta.label} subtitle="Bot detail · sample identity" onClose={onClose}>
       <div className="settings-profile">
         <Avatar agent={agent} size={36} />
         <div>
@@ -358,10 +447,12 @@ function BotDetailModal({
 }
 
 function ChipRefModal({
+  sheet,
   label,
   onClose,
   onOpenFile,
 }: {
+  sheet?: boolean
   label: string
   onClose: () => void
   onOpenFile: (fileId: string) => void
@@ -370,7 +461,7 @@ function ChipRefModal({
   const file = fileId ? FILES[fileId] : undefined
   const canvas = Object.values(CANVASES).find((item) => item.title === label)
   return (
-    <ModalShell title={label} subtitle="Sample reference chip" onClose={onClose}>
+    <ModalShell sheet={sheet} title={label} subtitle="Sample reference chip" onClose={onClose}>
       <p>This chip is a named artifact in the thread, not a dead label.</p>
       {file ? (
         <button type="button" className="ws-button" onClick={() => onOpenFile(file.id)}>

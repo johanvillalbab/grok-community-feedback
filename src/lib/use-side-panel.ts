@@ -16,6 +16,7 @@ export function useSidePanel(onWidthChange: (width: number) => void) {
       const panel = panelRef.current
       const app = panel?.parentElement
       if (!panel || !app) return
+      if (app.classList.contains('grok-app--phone')) return
       const sidebarWidth = readSidebarWidth(app)
       setValueMax(maxPreviewWidth(app.clientWidth, sidebarWidth))
       onWidthChange(clampPreviewWidth(panel.offsetWidth, app.clientWidth, sidebarWidth))
@@ -37,7 +38,7 @@ export function useSidePanel(onWidthChange: (width: number) => void) {
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const panel = panelRef.current
-    if (!panel) return
+    if (!panel || panel.closest('.grok-app--phone')) return
     dragRef.current = { startX: event.clientX, startWidth: panel.offsetWidth }
     event.currentTarget.setPointerCapture(event.pointerId)
     document.body.classList.add('is-resizing')

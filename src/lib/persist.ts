@@ -25,6 +25,7 @@ export type PersistedWorkspace = {
   installedListingIds?: string[]
   instrumentedEvents?: ActivityItem[]
   createdGoals?: ProductGoal[]
+  notifyGlobal?: boolean
 }
 
 export function loadPersistedWorkspace(): PersistedWorkspace {

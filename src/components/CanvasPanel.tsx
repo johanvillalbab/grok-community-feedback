@@ -9,6 +9,7 @@ import { CloseIcon, CanvasIcon, PlanIcon } from './Icons'
 type CanvasPanelProps = {
   canvas: WorkspaceCanvas
   width: number
+  sheet?: boolean
   onWidthChange: (width: number) => void
   onClose: () => void
 }
@@ -16,7 +17,7 @@ type CanvasPanelProps = {
 const NODE_WIDTH = 128
 const NODE_HEIGHT = 52
 
-export function CanvasPanel({ canvas, width, onWidthChange, onClose }: CanvasPanelProps) {
+export function CanvasPanel({ canvas, width, sheet = false, onWidthChange, onClose }: CanvasPanelProps) {
   const { panelRef, resizerProps } = useSidePanel(onWidthChange)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const fallbackNodeId = canvas.gantt?.tasks.find((task) => task.status === 'active')?.id
@@ -49,15 +50,17 @@ export function CanvasPanel({ canvas, width, onWidthChange, onClose }: CanvasPan
       ref={panelRef}
       id="workspace-canvas-panel"
       aria-labelledby="workspace-canvas-title"
-      className="preview-panel canvas-panel"
-      style={{ width, flexBasis: width }}
+      className={sheet ? 'preview-panel canvas-panel preview-panel--sheet' : 'preview-panel canvas-panel'}
+      style={sheet ? undefined : { width, flexBasis: width }}
     >
-      <div
-        className="preview-panel__resizer"
-        aria-label="Resize canvas"
-        aria-valuenow={width}
-        {...resizerProps}
-      />
+      {sheet ? null : (
+        <div
+          className="preview-panel__resizer"
+          aria-label="Resize canvas"
+          aria-valuenow={width}
+          {...resizerProps}
+        />
+      )}
       <header className="preview-panel__header">
         <div className="preview-panel__heading">
           <p>

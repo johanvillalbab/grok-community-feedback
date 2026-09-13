@@ -124,7 +124,7 @@ export type WorkspaceCanvas = {
   }
 }
 
-export type SettingsSection = 'profile' | 'autonomy' | 'permissions'
+export type SettingsSection = 'profile' | 'autonomy' | 'permissions' | 'notifications'
 
 export type WorkspaceSurface =
   | { kind: 'chat' }
@@ -136,6 +136,7 @@ export type WorkspaceSurface =
   | { kind: 'settings'; section: SettingsSection }
 
 export type WorkspaceModal =
+  | { kind: 'compose' }
   | { kind: 'new-goal' }
   | { kind: 'new-thread' }
   | { kind: 'share' }

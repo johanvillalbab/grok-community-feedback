@@ -11,6 +11,9 @@ type ArtifactsViewProps = {
   onOpenCanvas: (canvasId: string) => void
   onOpenFile: (fileId: string) => void
   onOpenGoal: (goalId: string) => void
+  onOpenAtlas?: () => void
+  onOpenNav?: () => void
+  onBack?: () => void
 }
 
 export function ArtifactsView({
@@ -21,6 +24,9 @@ export function ArtifactsView({
   onOpenCanvas,
   onOpenFile,
   onOpenGoal,
+  onOpenAtlas,
+  onOpenNav,
+  onBack,
 }: ArtifactsViewProps) {
   const items = artifactsForWorkspace(workspaceId)
   const selected = items.find((item) => item.id === selectedId) ?? items[0]
@@ -30,11 +36,18 @@ export function ArtifactsView({
       title="Artifacts"
       parent={`${workspaceName} · canvases, files, briefs`}
       icon={<LayersIcon />}
+      onOpenNav={onOpenNav}
+      onBack={onBack}
     >
       {items.length === 0 ? (
         <div className="workspace-empty">
           <h2>No sample artifacts here</h2>
           <p>Atlas holds the About canvases and files. Other workspaces keep their work in threads.</p>
+          {onOpenAtlas ? (
+            <button type="button" className="ws-button" onClick={onOpenAtlas}>
+              Open Atlas thread
+            </button>
+          ) : null}
         </div>
       ) : (
         <div className="artifact-layout">
@@ -65,7 +78,7 @@ export function ArtifactsView({
               <p className="artifact-detail__source">{selected.source}</p>
               <div className="goal-detail__actions">
                 {selected.canvasId ? (
-                  <button type="button" className="ws-button" onClick={() => onOpenCanvas(selected.canvasId!)}>Open in rail</button>
+                  <button type="button" className="ws-button" onClick={() => onOpenCanvas(selected.canvasId!)}>Open preview</button>
                 ) : null}
                 {selected.fileId ? (
                   <button type="button" className="ws-button" onClick={() => onOpenFile(selected.fileId!)}>Open file</button>

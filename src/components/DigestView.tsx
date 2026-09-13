@@ -11,6 +11,8 @@ type DigestViewProps = {
   onOpenGoal: (goalId: string) => void
   onOpenCanvas: (canvasId: string) => void
   onOpenThread: (threadId: string) => void
+  onOpenNav?: () => void
+  onBack?: () => void
 }
 
 export function DigestView({
@@ -21,6 +23,8 @@ export function DigestView({
   onOpenGoal,
   onOpenCanvas,
   onOpenThread,
+  onOpenNav,
+  onBack,
 }: DigestViewProps) {
   const cards = digestForWorkspace(workspaceId).filter((card) => !dismissedIds.includes(card.id))
 
@@ -29,6 +33,8 @@ export function DigestView({
       title="Proactive digest"
       parent={`${workspaceName} · suggested next moves`}
       icon={<SparkIcon />}
+      onOpenNav={onOpenNav}
+      onBack={onBack}
     >
       {cards.length === 0 ? (
         <div className="workspace-empty">

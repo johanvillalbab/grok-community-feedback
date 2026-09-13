@@ -46,18 +46,29 @@ npm run dev
 
 Open the local URL printed by Vite.
 
+## Demo it on a phone viewport
+
+The same build serves desktop and phone. There is no separate mobile app.
+
+1. Open the local URL in Chrome, Firefox, or Safari.
+2. Turn on the device toolbar (Chrome: `Ctrl+Shift+M` or `Cmd+Shift+M`) and pick a 390×844 phone, or drag the window narrower than 860px.
+3. The bot roster becomes a left drawer. The conversation stays the primary surface. Goals, Activity, Digest, Artifacts, Settings, Marketplace, and file/canvas previews stack as full-screen sheets.
+4. Computer updates stay desktop-only. Tap the purple monitor icon for the mock status → preview → takeover note.
+
+The `+` control opens a compose sheet: New thread, New group chat, or New sample goal. Notification toggles live under **Sho V. → Notifications**.
+
 ## Demo path
 
 Everything below is mock data. Nothing is sent to a network.
 
-1. Start in **Atlas → Design Engineer → About launch**. Send a note, open a file chip, and use **Main / Semantic review / Voice lock** to switch the main thread and a side room.
-2. Open **Goals** in the sidebar (or the flag in the chat header, or the goal chip in the thread). Pick **Ship About as identity** and open its related thread or plan canvas.
+1. Start in **Atlas → Design Engineer → About launch**. On a phone, open the menu to pick that thread. Send a note, open a file chip (it takes over the screen), and use **Main / Semantic review / Voice lock** to switch the main thread and a side room.
+2. Open **Goals** from the drawer (or the overflow menu, or the goal chip in the thread). Pick **Ship About as identity** and open its related thread or plan canvas.
 3. Click the Design Engineer avatar in the chat header, then **Activity log**. Approve or dismiss a waiting item. Filter by bot.
 4. Open **Digest**, then a card’s artifact or goal. **Artifacts** lists the same canvases, files, and the Preview cluster brief.
-5. Open **Sho V.** → **Autonomy** and **Permissions**. Change a bot’s level or a toggle, refresh, and confirm it stays. **Marketplace** installs sample bots only.
+5. Open **Sho V.** → **Autonomy**, **Permissions**, and **Notifications**. Change a bot’s level, a toggle, or a per-bot alert, refresh, and confirm it stays. **Marketplace** installs sample bots only.
 6. Instrumentation walk (configured → used → saw what happened): create a sample goal, change autonomy, toggle a permission, switch a thread or workspace, open a side room, open a file or canvas, open Digest, then open **Activity**. Filter **Events**. The log shows `goal_created`, `autonomy_changed`, `permission_toggled`, `context_changed`, `side_chat_opened`, `artifact_opened`, `digest_viewed`, and `activity_log_opened`.
 
-Other wired surfaces: **New thread** (`+`), **Channels**, **Share**, **Open in desktop**, **Add file**, **Voice message**, reactions, reply, and message more-actions. Search empty states offer Goals and Digest.
+Other wired surfaces: **New** (`+` → thread, group chat, or goal), **Channels**, **Share**, **Computer**, **Add file**, **Voice message**, reactions, reply, and message more-actions. Search empty states offer Goals and Digest. Artifacts outside Atlas offers a path back to the Atlas thread.
 
 ## Commands
 

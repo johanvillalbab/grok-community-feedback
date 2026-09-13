@@ -29,16 +29,20 @@ import {
 type SidebarProps = {
   workspace: Workspace
   activeId: string
+  activeRoomId: string | null
   surface: WorkspaceSurface
   rooms: SideRoom[]
   width: number
+  drawer?: boolean
+  open?: boolean
   onWidthChange: (width: number) => void
   onAnnounce?: (message: string) => void
+  onClose?: () => void
   onSelect: (id: string) => void
   onSelectRoom: (threadId: string, roomId: string) => void
   onWorkspaceChange: (id: string) => void
   onOpenSurface: (surface: WorkspaceSurface) => void
-  onNewThread: () => void
+  onCompose: () => void
   onMarketplace: () => void
   onProfile: () => void
 }
@@ -46,22 +50,26 @@ type SidebarProps = {
 export function Sidebar({
   workspace,
   activeId,
+  activeRoomId,
   surface,
   rooms,
   width,
+  drawer = false,
+  open = true,
   onWidthChange,
   onAnnounce,
+  onClose,
   onSelect,
   onSelectRoom,
   onWorkspaceChange,
   onOpenSurface,
-  onNewThread,
+  onCompose,
   onMarketplace,
   onProfile,
 }: SidebarProps) {
   const { panelRef, resizerProps } = useSidebarPanel({ onWidthChange, onAnnounce })
   const listRef = useRef<HTMLElement>(null)
-  const collapsed = isSidebarCollapsed(width)
+  const collapsed = !drawer && isSidebarCollapsed(width)
   const [query, setQuery] = useState('')
   const [openGroups, setOpenGroups] = useState<string[]>(() => {
     const parent = findGroup(workspace, activeId)
@@ -118,19 +126,30 @@ export function Sidebar({
     return () => window.clearTimeout(handle)
   }, [empty, onAnnounce, query, searching, threadCount])
 
+  const sidebarClass = [
+    'grok-sidebar',
+    collapsed ? 'grok-sidebar--collapsed' : '',
+    drawer ? 'grok-sidebar--drawer' : '',
+    drawer && open ? 'grok-sidebar--drawer-open' : '',
+  ].filter(Boolean).join(' ')
+
   return (
     <aside
       ref={panelRef}
-      className={collapsed ? 'grok-sidebar grok-sidebar--collapsed' : 'grok-sidebar'}
-      style={{ width, flexBasis: width }}
+      className={sidebarClass}
+      style={drawer ? undefined : { width, flexBasis: width }}
       aria-label="Workspace sidebar"
+      aria-hidden={drawer && !open}
+      id="workspace-nav"
     >
-      <div
-        className="sidebar-resizer"
-        aria-label={collapsed ? 'Expand workspace sidebar' : 'Resize workspace sidebar'}
-        aria-valuenow={width}
-        {...resizerProps}
-      />
+      {drawer ? null : (
+        <div
+          className="sidebar-resizer"
+          aria-label={collapsed ? 'Expand workspace sidebar' : 'Resize workspace sidebar'}
+          aria-valuenow={width}
+          {...resizerProps}
+        />
+      )}
       <div className="sidebar-top">
         <div className="windowbar">
           <span className="window-dots" aria-hidden="true">
@@ -138,7 +157,12 @@ export function Sidebar({
             <span className="window-dot window-dot--yellow" />
             <span className="window-dot window-dot--green" />
           </span>
-          <button type="button" className="sidebar-plus" aria-label="New thread" onClick={onNewThread}>
+          {drawer ? (
+            <button type="button" className="sidebar-close" aria-label="Close workspace menu" onClick={onClose}>
+              Close
+            </button>
+          ) : null}
+          <button type="button" className="sidebar-plus" aria-label="New conversation" onClick={onCompose}>
             <PlusIcon />
           </button>
         </div>
@@ -238,7 +262,12 @@ export function Sidebar({
                   <li key={room.id}>
                     <button
                       type="button"
-                      className={surface.kind === 'chat' && activeId === room.threadId ? 'nav-dest' : 'nav-dest'}
+                      className={
+                        surface.kind === 'chat' && activeId === room.threadId && activeRoomId === room.id
+                          ? 'nav-dest nav-dest--active'
+                          : 'nav-dest'
+                      }
+                      aria-current={surface.kind === 'chat' && activeId === room.threadId && activeRoomId === room.id ? 'page' : undefined}
                       onClick={() => onSelectRoom(room.threadId, room.id)}
                     >
                       <HashIcon />

@@ -152,6 +152,37 @@ export function CanvasPanel({ canvas, width, onWidthChange, onClose }: CanvasPan
           </section>
         ) : null}
 
+        {canvas.quotes ? (
+          <section className="canvas-section" aria-labelledby={`${canvas.id}-quotes-title`}>
+            <h2 id={`${canvas.id}-quotes-title`}>{canvas.quotes.title}</h2>
+            <ul className="canvas-quotes">
+              {canvas.quotes.items.map((item) => (
+                <li key={item.quote}>
+                  <blockquote>{item.quote}</blockquote>
+                  <cite>{item.source}</cite>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {canvas.checklist ? (
+          <section className="canvas-section" aria-labelledby={`${canvas.id}-check-title`}>
+            <h2 id={`${canvas.id}-check-title`}>{canvas.checklist.title}</h2>
+            <ul className="canvas-check">
+              {canvas.checklist.items.map((item) => (
+                <li key={item.label} className={item.done ? 'canvas-check__item canvas-check__item--done' : 'canvas-check__item'}>
+                  <span aria-hidden="true">{item.done ? '●' : '○'}</span>
+                  <div>
+                    <strong>{item.label}</strong>
+                    {item.owner ? <p>{item.owner}</p> : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         {canvas.table ? (
           <section className="canvas-section" aria-labelledby={`${canvas.id}-table-title`}>
             <h2 id={`${canvas.id}-table-title`}>{canvas.table.caption}</h2>

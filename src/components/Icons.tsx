@@ -209,3 +209,56 @@ export function FileIcon({ className }: IconProps) {
     </Icon>
   )
 }
+
+export function FlagIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M5 4v16" />
+      <path d="M5 5h10.5L14 8.5 15.5 12H5" />
+    </Icon>
+  )
+}
+
+export function PulseIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M3 12h3.2l2-6 3.6 12 2.4-6H21" />
+    </Icon>
+  )
+}
+
+export function SparkIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M12 3.5 13.4 9l5.6 1.4L13.4 12 12 17.5 10.6 12 5 10.4 10.6 9Z" />
+    </Icon>
+  )
+}
+
+export function LayersIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="m4 8 8-4 8 4-8 4Z" />
+      <path d="m4 12 8 4 8-4" />
+      <path d="m4 16 8 4 8-4" />
+    </Icon>
+  )
+}
+
+export function ArchiveIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <rect x="3.5" y="4" width="17" height="4" rx="1.2" />
+      <path d="M5 8v10.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V8" />
+      <path d="M9.5 12h5" />
+    </Icon>
+  )
+}
+
+export function ShieldIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M12 3.5 19 6v6.2c0 4-2.8 6.8-7 8.3-4.2-1.5-7-4.3-7-8.3V6Z" />
+    </Icon>
+  )
+}

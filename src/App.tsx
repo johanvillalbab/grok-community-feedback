@@ -1,123 +1,169 @@
-import { useMemo, useRef, useState } from 'react'
+import { ActivityLog } from './components/ActivityLog'
+import { ArtifactsView } from './components/ArtifactsView'
 import { CanvasPanel } from './components/CanvasPanel'
 import { Chat } from './components/Chat'
+import { DigestView } from './components/DigestView'
+import { GoalsBoard } from './components/GoalsBoard'
+import { MarketplaceView } from './components/MarketplaceView'
 import { PreviewPanel } from './components/PreviewPanel'
+import { SettingsView } from './components/SettingsView'
 import { Sidebar } from './components/Sidebar'
-import { CANVASES, DEFAULT_CONVERSATION_ID, DEFAULT_WORKSPACE_ID, FEEDS, FILES } from './data'
-import { defaultCanvasWidth, defaultPreviewWidth, defaultSidebarWidth } from './lib/preview-layout'
-import { findThread, firstThread, getWorkspace } from './lib/workspace-nav'
-import type { OpenArtifact } from './types'
+import { WorkspaceModals } from './components/WorkspaceModals'
+import { listingById } from './workspace-data'
+import { useWorkspace } from './lib/use-workspace'
 
 export default function App() {
-  const [workspaceId, setWorkspaceId] = useState(DEFAULT_WORKSPACE_ID)
-  const [activeId, setActiveId] = useState(DEFAULT_CONVERSATION_ID)
-  const [artifact, setArtifact] = useState<OpenArtifact | null>(null)
-  const [previewWidth, setPreviewWidth] = useState(defaultPreviewWidth)
-  const [sidebarWidth, setSidebarWidth] = useState(defaultSidebarWidth)
-  const [liveMessage, setLiveMessage] = useState('')
-  const openerRef = useRef<HTMLElement | null>(null)
-
-  const workspace = useMemo(() => getWorkspace(workspaceId), [workspaceId])
-  const conversation = useMemo(
-    () => findThread(workspace, activeId) ?? firstThread(workspace),
-    [activeId, workspace],
-  )
-  const feed = FEEDS[conversation.id] ?? []
-  const file = artifact?.kind === 'file' ? FILES[artifact.id] : undefined
-  const canvas = artifact?.kind === 'canvas' ? CANVASES[artifact.id] : undefined
-
-  const rememberOpener = () => {
-    const active = document.activeElement
-    if (active instanceof HTMLElement) openerRef.current = active
-  }
-
-  const closeArtifact = () => {
-    const panelId = artifact?.kind === 'canvas' ? 'workspace-canvas-panel' : 'file-preview-panel'
-    const panel = document.getElementById(panelId)
-    const restore = Boolean(panel?.contains(document.activeElement))
-    const message = artifact?.kind === 'canvas'
-      ? 'Canvas closed'
-      : artifact?.kind === 'file'
-        ? 'Preview closed'
-        : ''
-    setArtifact(null)
-    if (message) setLiveMessage(message)
-    if (restore) {
-      const opener = openerRef.current
-      queueMicrotask(() => opener?.focus())
-    }
-  }
-
-  const openFile = (id: string) => {
-    rememberOpener()
-    if (!artifact) setPreviewWidth(defaultPreviewWidth())
-    setArtifact({ kind: 'file', id })
-    const next = FILES[id]
-    if (next) setLiveMessage(`Preview open: ${next.name}`)
-  }
-
-  const openCanvas = (id: string) => {
-    if (artifact?.kind === 'canvas' && artifact.id === id) {
-      closeArtifact()
-      return
-    }
-    rememberOpener()
-    if (!artifact) setPreviewWidth(defaultCanvasWidth())
-    setArtifact({ kind: 'canvas', id })
-    const next = CANVASES[id]
-    if (next) setLiveMessage(`Canvas open: ${next.title}`)
-  }
+  const workspace = useWorkspace()
+  const previewOpen = Boolean(workspace.file || workspace.canvas)
 
   return (
-    <div className={artifact ? 'grok-app grok-app--preview' : 'grok-app'}>
+    <div className={previewOpen ? 'grok-app grok-app--preview' : 'grok-app'}>
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <Sidebar
-        workspace={workspace}
-        activeId={conversation.id}
-        width={sidebarWidth}
-        onWidthChange={setSidebarWidth}
-        onAnnounce={setLiveMessage}
-        onSelect={(id) => {
-          const next = findThread(workspace, id) ?? firstThread(workspace)
-          setActiveId(next.id)
-          setArtifact(null)
-          setLiveMessage(`${next.parentTitle}: ${next.title}`)
-        }}
-        onWorkspaceChange={(id) => {
-          const nextWorkspace = getWorkspace(id)
-          const nextThread = findThread(nextWorkspace, activeId) ?? firstThread(nextWorkspace)
-          setWorkspaceId(nextWorkspace.id)
-          setActiveId(nextThread.id)
-          setArtifact(null)
-          setLiveMessage(`Workspace: ${nextWorkspace.name}. ${nextThread.parentTitle}: ${nextThread.title}`)
-        }}
+        workspace={workspace.workspace}
+        activeId={workspace.conversation.id}
+        surface={workspace.surface}
+        rooms={workspace.rooms}
+        width={workspace.sidebarWidth}
+        onWidthChange={workspace.setSidebarWidth}
+        onAnnounce={workspace.announce}
+        onSelect={(id) => workspace.selectThread(id)}
+        onSelectRoom={(threadId, roomId) => workspace.selectThread(threadId, roomId)}
+        onWorkspaceChange={workspace.changeWorkspace}
+        onOpenSurface={workspace.openSurface}
+        onNewThread={() => workspace.setModal({ kind: 'new-thread' })}
+        onMarketplace={() => workspace.openSurface({ kind: 'marketplace' })}
+        onProfile={() => workspace.openSettings('profile')}
       />
-      <Chat
-        conversation={conversation}
-        feed={feed}
-        activeFileId={artifact?.kind === 'file' ? artifact.id : null}
-        activeCanvasId={artifact?.kind === 'canvas' ? artifact.id : null}
-        onOpenFile={openFile}
-        onOpenCanvas={openCanvas}
-      />
-      {file ? (
+      {workspace.surface.kind === 'chat' ? (
+        <Chat
+          conversation={workspace.conversation}
+          feed={workspace.feed}
+          rooms={workspace.threadRooms}
+          activeRoom={workspace.activeRoom}
+          activeFileId={workspace.artifact?.kind === 'file' ? workspace.artifact.id : null}
+          activeCanvasId={workspace.artifact?.kind === 'canvas' ? workspace.artifact.id : null}
+          activeGoalId={workspace.surface.kind === 'chat' ? undefined : undefined}
+          reactions={workspace.reactions}
+          onOpenFile={workspace.openFile}
+          onOpenCanvas={workspace.openCanvas}
+          onOpenGoal={(goalId) => workspace.openSurface({ kind: 'goals', goalId: goalId || undefined })}
+          onSelectRoom={(roomId) => workspace.setActiveRoomId(roomId)}
+          onNewRoom={() => workspace.setModal({ kind: 'new-room' })}
+          onRenameRoom={(roomId) => workspace.setModal({ kind: 'rename-room', roomId })}
+          onArchiveRoom={workspace.archiveRoom}
+          onRestoreRoom={workspace.restoreRoom}
+          onShare={() => workspace.setModal({ kind: 'share' })}
+          onDesktop={() => workspace.setModal({ kind: 'desktop' })}
+          onAddFile={() => workspace.setModal({ kind: 'add-file' })}
+          onVoice={() => workspace.setModal({ kind: 'voice' })}
+          onSend={(text) => workspace.appendMessage(
+            { threadId: workspace.conversation.id, roomId: workspace.activeRoomId ?? undefined },
+            text,
+          )}
+          onReaction={(messageId) => workspace.setModal({ kind: 'reaction', messageId })}
+          onReply={() => workspace.setModal({ kind: 'new-room' })}
+          onMore={(messageId) => workspace.setModal({ kind: 'more', messageId })}
+          onIdentity={() => workspace.setModal({
+            kind: 'bot-detail',
+            agent: workspace.conversation.kind === 'agent' ? workspace.conversation.agent : 'community',
+          })}
+          onActivity={() => workspace.openSurface({
+            kind: 'activity',
+            agent: workspace.conversation.kind === 'agent' ? workspace.conversation.agent : undefined,
+          })}
+          onChip={(label) => workspace.setModal({ kind: 'chip-ref', label })}
+          onExternalLink={(href, title) => workspace.setModal({ kind: 'external-link', href, title })}
+        />
+      ) : null}
+      {workspace.surface.kind === 'goals' ? (
+        <GoalsBoard
+          workspaceId={workspace.workspace.id}
+          workspaceName={workspace.workspace.name}
+          selectedId={workspace.surface.goalId}
+          onSelect={(goalId) => workspace.openSurface({ kind: 'goals', goalId })}
+          onOpenThread={(threadId) => workspace.selectThread(threadId)}
+          onOpenCanvas={workspace.openCanvas}
+        />
+      ) : null}
+      {workspace.surface.kind === 'activity' ? (
+        <ActivityLog
+          workspaceId={workspace.workspace.id}
+          workspaceName={workspace.workspace.name}
+          items={workspace.activity}
+          agent={workspace.surface.agent}
+          onFilterAgent={(agent) => workspace.openSurface({ kind: 'activity', agent })}
+          onOpenThread={(threadId) => workspace.selectThread(threadId)}
+          onOpenCanvas={workspace.openCanvas}
+          onOpenFile={workspace.openFile}
+          onOpenGoal={(goalId) => workspace.openSurface({ kind: 'goals', goalId })}
+          onSetApproval={workspace.setApproval}
+        />
+      ) : null}
+      {workspace.surface.kind === 'digest' ? (
+        <DigestView
+          workspaceId={workspace.workspace.id}
+          workspaceName={workspace.workspace.name}
+          dismissedIds={workspace.dismissedDigestIds}
+          onDismiss={workspace.dismissDigest}
+          onOpenGoal={(goalId) => workspace.openSurface({ kind: 'goals', goalId })}
+          onOpenCanvas={workspace.openCanvas}
+          onOpenThread={(threadId) => workspace.selectThread(threadId)}
+        />
+      ) : null}
+      {workspace.surface.kind === 'artifacts' ? (
+        <ArtifactsView
+          workspaceId={workspace.workspace.id}
+          workspaceName={workspace.workspace.name}
+          selectedId={workspace.surface.artifactId}
+          onSelect={(artifactId) => workspace.openSurface({ kind: 'artifacts', artifactId })}
+          onOpenCanvas={workspace.openCanvas}
+          onOpenFile={workspace.openFile}
+          onOpenGoal={(goalId) => workspace.openSurface({ kind: 'goals', goalId })}
+        />
+      ) : null}
+      {workspace.surface.kind === 'marketplace' ? (
+        <MarketplaceView
+          selectedId={workspace.surface.listingId}
+          installedIds={workspace.installedListingIds}
+          onSelect={(listingId) => workspace.openSurface({ kind: 'marketplace', listingId })}
+          onToggle={workspace.toggleListing}
+          onOpenBot={(listing) => {
+            const listingMeta = listingById(listing.id) ?? listing
+            if (listingMeta.agent) workspace.setModal({ kind: 'bot-detail', agent: listingMeta.agent })
+          }}
+        />
+      ) : null}
+      {workspace.surface.kind === 'settings' ? (
+        <SettingsView
+          section={workspace.surface.section}
+          permissions={workspace.permissions}
+          onSection={(section) => workspace.openSettings(section)}
+          onAutonomy={workspace.updateAutonomy}
+          onCapability={workspace.toggleCapability}
+          onApproval={workspace.toggleApprovalRequired}
+          onOpenActivity={(agent) => workspace.openSurface({ kind: 'activity', agent })}
+        />
+      ) : null}
+      {workspace.file ? (
         <PreviewPanel
-          file={file}
-          width={previewWidth}
-          onWidthChange={setPreviewWidth}
-          onClose={closeArtifact}
+          file={workspace.file}
+          width={workspace.previewWidth}
+          onWidthChange={workspace.setPreviewWidth}
+          onClose={workspace.closeArtifact}
         />
       ) : null}
-      {canvas ? (
+      {workspace.canvas ? (
         <CanvasPanel
-          canvas={canvas}
-          width={previewWidth}
-          onWidthChange={setPreviewWidth}
-          onClose={closeArtifact}
+          canvas={workspace.canvas}
+          width={workspace.previewWidth}
+          onWidthChange={workspace.setPreviewWidth}
+          onClose={workspace.closeArtifact}
         />
       ) : null}
+      <WorkspaceModals workspace={workspace} />
       <div className="sr-only" role="status" aria-atomic="true" aria-live="polite">
-        {liveMessage}
+        {workspace.liveMessage}
       </div>
     </div>
   )

@@ -943,8 +943,14 @@ body.is-resizing .sidebar-resizer::after {
   color: #9a9a9a;
 }
 
-.chat-header__actions {
+.chat-header__actions,
+.chat-header__essential {
   gap: 2px;
+}
+
+.chat-header__essential {
+  display: flex;
+  align-items: center;
 }
 
 .chat-icon-button {
@@ -2678,11 +2684,17 @@ body.is-resizing {
   line-height: 15px;
 }
 
+.activity-event {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .goal-card__top,
 .goal-card__meta,
 .activity-item__top,
 .activity-item__meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -3186,6 +3198,35 @@ body.is-resizing {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.workspace-toolbar {
+  flex: 0 0 auto;
+  padding: 8px 16px 0;
+  border-bottom: 1px solid #1f1f1f;
+  background: #070707;
+}
+
+.workspace-toolbar .activity-instrument-note {
+  margin-bottom: 8px;
+}
+
+.workspace-toolbar .activity-filters {
+  margin-bottom: 10px;
+}
+
+.surface-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 16;
+  display: flex;
+  flex-direction: column;
+  background: #070707;
+}
+
+.surface-sheet .grok-chat {
+  width: 100%;
+  height: 100%;
 }
 
 .settings-check--row {

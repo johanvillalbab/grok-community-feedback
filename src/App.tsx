@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { ActivityLog } from './components/ActivityLog'
 import { ArtifactsView } from './components/ArtifactsView'
 import { CanvasPanel } from './components/CanvasPanel'
@@ -86,8 +86,9 @@ export default function App() {
         onMarketplace={() => workspace.openSurface({ kind: 'marketplace' })}
         onProfile={() => workspace.openSettings('profile')}
       />
-      {workspace.surface.kind === 'chat' ? (
+      {workspace.surface.kind === 'chat' || phone ? (
         <Chat
+          main={workspace.surface.kind === 'chat'}
           conversation={workspace.conversation}
           feed={workspace.feed}
           rooms={workspace.threadRooms}
@@ -130,6 +131,7 @@ export default function App() {
         />
       ) : null}
       {workspace.surface.kind === 'goals' ? (
+        <SurfaceFrame phone={phone}>
         <GoalsBoard
           workspaceId={workspace.workspace.id}
           workspaceName={workspace.workspace.name}
@@ -142,8 +144,10 @@ export default function App() {
           onOpenThread={(threadId) => workspace.selectThread(threadId)}
           onOpenCanvas={workspace.openCanvas}
         />
+        </SurfaceFrame>
       ) : null}
       {workspace.surface.kind === 'activity' ? (
+        <SurfaceFrame phone={phone}>
         <ActivityLog
           workspaceId={workspace.workspace.id}
           workspaceName={workspace.workspace.name}
@@ -158,8 +162,10 @@ export default function App() {
           onOpenGoal={(goalId) => workspace.openSurface({ kind: 'goals', goalId })}
           onSetApproval={workspace.setApproval}
         />
+        </SurfaceFrame>
       ) : null}
       {workspace.surface.kind === 'digest' ? (
+        <SurfaceFrame phone={phone}>
         <DigestView
           workspaceId={workspace.workspace.id}
           workspaceName={workspace.workspace.name}
@@ -171,8 +177,10 @@ export default function App() {
           onOpenCanvas={workspace.openCanvas}
           onOpenThread={(threadId) => workspace.selectThread(threadId)}
         />
+        </SurfaceFrame>
       ) : null}
       {workspace.surface.kind === 'artifacts' ? (
+        <SurfaceFrame phone={phone}>
         <ArtifactsView
           workspaceId={workspace.workspace.id}
           workspaceName={workspace.workspace.name}
@@ -185,8 +193,10 @@ export default function App() {
           onOpenGoal={(goalId) => workspace.openSurface({ kind: 'goals', goalId })}
           onOpenAtlas={workspace.openAtlasThread}
         />
+        </SurfaceFrame>
       ) : null}
       {workspace.surface.kind === 'marketplace' ? (
+        <SurfaceFrame phone={phone}>
         <MarketplaceView
           selectedId={workspace.surface.listingId}
           installedIds={workspace.installedListingIds}
@@ -199,8 +209,10 @@ export default function App() {
             if (listingMeta.agent) workspace.setModal({ kind: 'bot-detail', agent: listingMeta.agent })
           }}
         />
+        </SurfaceFrame>
       ) : null}
       {workspace.surface.kind === 'settings' ? (
+        <SurfaceFrame phone={phone}>
         <SettingsView
           section={workspace.surface.section}
           permissions={workspace.permissions}
@@ -214,6 +226,7 @@ export default function App() {
           onNotifyGlobal={workspace.setNotifyGlobal}
           onOpenActivity={(agent) => workspace.openSurface({ kind: 'activity', agent })}
         />
+        </SurfaceFrame>
       ) : null}
       {workspace.file ? (
         <PreviewPanel
@@ -236,4 +249,9 @@ export default function App() {
       <WorkspaceModals workspace={workspace} phone={phone} />
     </div>
   )
+}
+
+function SurfaceFrame({ phone, children }: { phone: boolean; children: ReactNode }) {
+  if (!phone) return children
+  return <div className="surface-sheet">{children}</div>
 }

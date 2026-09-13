@@ -7,9 +7,11 @@ type WorkspaceScreenProps = {
   parent: string
   icon: ReactNode
   actions?: ReactNode
+  toolbar?: ReactNode
   children: ReactNode
   onOpenNav?: () => void
   onBack?: () => void
+  main?: boolean
 }
 
 export function WorkspaceScreen({
@@ -17,12 +19,18 @@ export function WorkspaceScreen({
   parent,
   icon,
   actions,
+  toolbar,
   children,
   onOpenNav,
   onBack,
+  main = true,
 }: WorkspaceScreenProps) {
   return (
-    <main id="main-content" className="grok-chat workspace-screen" tabIndex={-1}>
+    <main
+      id={main ? 'main-content' : undefined}
+      className="grok-chat workspace-screen"
+      tabIndex={-1}
+    >
       <header className="chat-header">
         {onOpenNav ? (
           <button
@@ -50,6 +58,7 @@ export function WorkspaceScreen({
           ) : null}
         </div>
       </header>
+      {toolbar ? <div className="workspace-toolbar">{toolbar}</div> : null}
       <div className="chat-scroll">
         <p className="workspace-sample-note">{SAMPLE_NOTE}</p>
         {children}

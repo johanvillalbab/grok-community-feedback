@@ -53,6 +53,7 @@ type ChatProps = {
   onExternalLink: (href: string, title: string) => void
   navOpen?: boolean
   onOpenNav?: () => void
+  main?: boolean
 }
 
 export function Chat({
@@ -86,6 +87,7 @@ export function Chat({
   onExternalLink,
   navOpen = false,
   onOpenNav,
+  main = true,
 }: ChatProps) {
   const canvases = canvasesForConversation(conversation.id)
   const headerCanvas = canvases[0]
@@ -116,7 +118,12 @@ export function Chat({
   }
 
   return (
-    <main id="main-content" className="grok-chat" tabIndex={-1}>
+    <main
+      id={main ? 'main-content' : undefined}
+      className="grok-chat"
+      tabIndex={-1}
+      aria-hidden={main ? undefined : true}
+    >
       <header className="chat-header">
         {onOpenNav ? (
           <IconButton
@@ -139,23 +146,25 @@ export function Chat({
           </div>
         </button>
         <div className="chat-header__actions">
-          <button
-            type="button"
-            className={[
-              'chat-icon-button',
-              'chat-header__button',
-              'chat-header__computer',
-              computerActive ? 'chat-header__computer--active' : '',
-            ].join(' ')}
-            aria-label={computerActive ? 'Computer is active. Open computer status' : 'Computer status'}
-            onClick={onDesktop}
-          >
-            <MonitorIcon />
-          </button>
-          <div className="chat-header__rail">
-            <IconButton label="Activity" className="chat-header__button" onClick={onActivity}>
+          <div className="chat-header__essential">
+            <IconButton label="Activity" className="chat-header__button chat-header__pulse" onClick={onActivity}>
               <PulseIcon />
             </IconButton>
+            <button
+              type="button"
+              className={[
+                'chat-icon-button',
+                'chat-header__button',
+                'chat-header__computer',
+                computerActive ? 'chat-header__computer--active' : '',
+              ].join(' ')}
+              aria-label={computerActive ? 'Computer is active. Open computer status' : 'Computer status'}
+              onClick={onDesktop}
+            >
+              <MonitorIcon />
+            </button>
+          </div>
+          <div className="chat-header__rail">
             <IconButton label="Open Goals" className="chat-header__button" onClick={() => onOpenGoal('')}>
               <FlagIcon />
             </IconButton>

@@ -9,6 +9,8 @@ type MarketplaceViewProps = {
   onSelect: (id: string) => void
   onToggle: (id: string, installed: boolean) => void
   onOpenBot: (listing: MarketplaceListing) => void
+  onOpenNav?: () => void
+  onBack?: () => void
 }
 
 export function MarketplaceView({
@@ -17,6 +19,8 @@ export function MarketplaceView({
   onSelect,
   onToggle,
   onOpenBot,
+  onOpenNav,
+  onBack,
 }: MarketplaceViewProps) {
   const selected = listingById(selectedId ?? '') ?? MARKETPLACE[0]
 
@@ -25,6 +29,8 @@ export function MarketplaceView({
       title="Marketplace"
       parent="Sample bots for this feedback workspace"
       icon={<GridIcon />}
+      onOpenNav={onOpenNav}
+      onBack={onBack}
     >
       <ul className="market-grid">
         {MARKETPLACE.map((listing) => {

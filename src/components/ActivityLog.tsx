@@ -16,6 +16,11 @@ type ActivityLogProps = {
   onOpenFile: (fileId: string) => void
   onOpenGoal: (goalId: string) => void
   onSetApproval: (id: string, state: ApprovalState) => void
+  onOpenNav?: () => void
+  onBack?: () => void
+  onOpenGoals?: () => void
+  onOpenSettings?: () => void
+  onOpenDigest?: () => void
 }
 
 export function ActivityLog({
@@ -29,6 +34,11 @@ export function ActivityLog({
   onOpenFile,
   onOpenGoal,
   onSetApproval,
+  onOpenNav,
+  onBack,
+  onOpenGoals,
+  onOpenSettings,
+  onOpenDigest,
 }: ActivityLogProps) {
   const [eventsOnly, setEventsOnly] = useState(false)
   const workspaceItems = items.filter((item) => item.workspaceId === workspaceId)
@@ -44,6 +54,8 @@ export function ActivityLog({
       title={agent ? `${AGENT_META[agent].label} activity` : 'Activity'}
       parent={`${workspaceName} · background work (sample)`}
       icon={<PulseIcon />}
+      onOpenNav={onOpenNav}
+      onBack={onBack}
       actions={agent ? (
         <button
           type="button"
@@ -56,43 +68,63 @@ export function ActivityLog({
           All bots
         </button>
       ) : null}
+      toolbar={(
+        <>
+          <p className="activity-instrument-note activity-instrument-note--full">
+            Mock events from this session show their names in the log: <code>goal_created</code>, <code>autonomy_changed</code>, <code>permission_toggled</code>, <code>context_changed</code>, <code>side_chat_opened</code>, <code>artifact_opened</code>, <code>digest_viewed</code>, <code>activity_log_opened</code>.
+          </p>
+          <p className="activity-instrument-note activity-instrument-note--short">
+            Session events land here after Goals, Settings, or Digest.
+          </p>
+          <div className="activity-filters" role="tablist" aria-label="Filter activity">
+            <FilterChip
+              label="Everyone"
+              current={!eventsOnly && !agent}
+              onClick={() => {
+                setEventsOnly(false)
+                onFilterAgent(undefined)
+              }}
+            />
+            <FilterChip
+              label="Events"
+              current={eventsOnly}
+              onClick={() => {
+                setEventsOnly(true)
+                onFilterAgent(undefined)
+              }}
+            />
+            {agents.map((key) => (
+              <FilterChip
+                key={key}
+                label={AGENT_META[key].label}
+                current={!eventsOnly && agent === key}
+                onClick={() => {
+                  setEventsOnly(false)
+                  onFilterAgent(key)
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
     >
-      <p className="activity-instrument-note">
-        Mock events from this session show their names in the log: <code>goal_created</code>, <code>autonomy_changed</code>, <code>permission_toggled</code>, <code>context_changed</code>, <code>side_chat_opened</code>, <code>artifact_opened</code>, <code>digest_viewed</code>, <code>activity_log_opened</code>.
-      </p>
-      <div className="activity-filters" role="tablist" aria-label="Filter activity">
-        <FilterChip
-          label="Everyone"
-          current={!eventsOnly && !agent}
-          onClick={() => {
-            setEventsOnly(false)
-            onFilterAgent(undefined)
-          }}
-        />
-        <FilterChip
-          label="Events"
-          current={eventsOnly}
-          onClick={() => {
-            setEventsOnly(true)
-            onFilterAgent(undefined)
-          }}
-        />
-        {agents.map((key) => (
-          <FilterChip
-            key={key}
-            label={AGENT_META[key].label}
-            current={!eventsOnly && agent === key}
-            onClick={() => {
-              setEventsOnly(false)
-              onFilterAgent(key)
-            }}
-          />
-        ))}
-      </div>
       {visible.length === 0 ? (
         <div className="workspace-empty">
-          <h2>No sample activity here</h2>
-          <p>Bots in this workspace have not posted a background action in the mock log.</p>
+          <h2>{eventsOnly ? 'No events yet this session' : 'No sample activity here'}</h2>
+          {eventsOnly ? (
+            <>
+              <p>
+                Walk the loop: create a Goal, change Autonomy or a permission in Settings, then open Digest. Those writes <code>goal_created</code>, <code>autonomy_changed</code>, <code>permission_toggled</code>, and <code>digest_viewed</code> here.
+              </p>
+              <div className="goal-detail__actions">
+                {onOpenGoals ? <button type="button" className="ws-button" onClick={onOpenGoals}>Goals</button> : null}
+                {onOpenSettings ? <button type="button" className="ws-button ws-button--ghost" onClick={onOpenSettings}>Settings</button> : null}
+                {onOpenDigest ? <button type="button" className="ws-button ws-button--ghost" onClick={onOpenDigest}>Digest</button> : null}
+              </div>
+            </>
+          ) : (
+            <p>Bots in this workspace have not posted a background action in the mock log.</p>
+          )}
         </div>
       ) : (
         <ol className="activity-list">

@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react'
 import { CANVASES, canvasesForConversation } from '../data'
 import { EXTERNAL_PREVIEWS } from '../workspace-data'
 import type { Conversation, FeedItem, InlineToken, SideRoom } from '../types'
@@ -12,6 +12,7 @@ import {
   DotsIcon,
   FlagIcon,
   HashIcon,
+  MenuIcon,
   MicIcon,
   MonitorIcon,
   PlusIcon,
@@ -50,6 +51,9 @@ type ChatProps = {
   onActivity: () => void
   onChip: (label: string) => void
   onExternalLink: (href: string, title: string) => void
+  navOpen?: boolean
+  onOpenNav?: () => void
+  main?: boolean
 }
 
 export function Chat({
@@ -81,6 +85,9 @@ export function Chat({
   onActivity,
   onChip,
   onExternalLink,
+  navOpen = false,
+  onOpenNav,
+  main = true,
 }: ChatProps) {
   const canvases = canvasesForConversation(conversation.id)
   const headerCanvas = canvases[0]
@@ -88,6 +95,19 @@ export function Chat({
   const openRooms = rooms.filter((room) => room.status === 'open')
   const archivedRooms = rooms.filter((room) => room.status === 'archived')
   const [draft, setDraft] = useState('')
+  const [moreOpen, setMoreOpen] = useState(false)
+  const overflowRef = useRef<HTMLDivElement>(null)
+  const computerActive = conversation.kind === 'agent' && conversation.agent === 'design'
+
+  useEffect(() => {
+    if (!moreOpen) return
+    const onPointerDown = (event: PointerEvent) => {
+      if (overflowRef.current?.contains(event.target as Node)) return
+      setMoreOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [moreOpen])
 
   const submit = (event?: FormEvent) => {
     event?.preventDefault()
@@ -98,8 +118,22 @@ export function Chat({
   }
 
   return (
-    <main id="main-content" className="grok-chat" tabIndex={-1}>
+    <main
+      id={main ? 'main-content' : undefined}
+      className="grok-chat"
+      tabIndex={-1}
+      aria-hidden={main ? undefined : true}
+    >
       <header className="chat-header">
+        {onOpenNav ? (
+          <IconButton
+            label={navOpen ? 'Close workspace menu' : 'Open workspace menu'}
+            className="chat-header__button chat-header__menu"
+            onClick={onOpenNav}
+          >
+            <MenuIcon />
+          </IconButton>
+        ) : null}
         <button type="button" className="chat-header__identity chat-header__identity--button" onClick={onIdentity}>
           <span aria-hidden="true">
             <ConversationGlyph conversation={conversation} />
@@ -112,34 +146,70 @@ export function Chat({
           </div>
         </button>
         <div className="chat-header__actions">
-          <IconButton label="Activity" className="chat-header__button" onClick={onActivity}>
-            <PulseIcon />
-          </IconButton>
-          <IconButton label="Open Goals" className="chat-header__button" onClick={() => onOpenGoal('')}>
-            <FlagIcon />
-          </IconButton>
-          {headerCanvas ? (
+          <div className="chat-header__essential">
+            <IconButton label="Activity" className="chat-header__button chat-header__pulse" onClick={onActivity}>
+              <PulseIcon />
+            </IconButton>
             <button
               type="button"
               className={[
                 'chat-icon-button',
                 'chat-header__button',
-                activeCanvasId ? 'chat-header__button--active' : '',
+                'chat-header__computer',
+                computerActive ? 'chat-header__computer--active' : '',
               ].join(' ')}
-              aria-label={openCanvas ? `Canvas open: ${openCanvas.title}` : `Open canvas: ${headerCanvas.title}`}
-              aria-expanded={Boolean(activeCanvasId)}
-              aria-controls={activeCanvasId ? 'workspace-canvas-panel' : undefined}
-              onClick={() => onOpenCanvas(activeCanvasId ?? headerCanvas.id)}
+              aria-label={computerActive ? 'Computer is active. Open computer status' : 'Computer status'}
+              onClick={onDesktop}
             >
-              <CanvasIcon />
+              <MonitorIcon />
             </button>
-          ) : null}
-          <IconButton label="Share" className="chat-header__button" onClick={onShare}>
-            <ShareIcon />
-          </IconButton>
-          <IconButton label="Open in desktop" className="chat-header__button" onClick={onDesktop}>
-            <MonitorIcon />
-          </IconButton>
+          </div>
+          <div className="chat-header__rail">
+            <IconButton label="Open Goals" className="chat-header__button" onClick={() => onOpenGoal('')}>
+              <FlagIcon />
+            </IconButton>
+            {headerCanvas ? (
+              <button
+                type="button"
+                className={[
+                  'chat-icon-button',
+                  'chat-header__button',
+                  activeCanvasId ? 'chat-header__button--active' : '',
+                ].join(' ')}
+                aria-label={openCanvas ? `Canvas open: ${openCanvas.title}` : `Open canvas: ${headerCanvas.title}`}
+                aria-expanded={Boolean(activeCanvasId)}
+                aria-controls={activeCanvasId ? 'workspace-canvas-panel' : undefined}
+                onClick={() => onOpenCanvas(activeCanvasId ?? headerCanvas.id)}
+              >
+                <CanvasIcon />
+              </button>
+            ) : null}
+            <IconButton label="Share" className="chat-header__button" onClick={onShare}>
+              <ShareIcon />
+            </IconButton>
+          </div>
+          <div className="chat-header__overflow" ref={overflowRef}>
+            <IconButton
+              label="Thread actions"
+              className="chat-header__button"
+              onClick={() => setMoreOpen((value) => !value)}
+            >
+              <DotsIcon />
+            </IconButton>
+            {moreOpen ? (
+              <div className="chat-overflow" role="menu">
+                <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); onActivity() }}>Activity</button>
+                <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); onOpenGoal('') }}>Goals</button>
+                {headerCanvas ? (
+                  <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); onOpenCanvas(activeCanvasId ?? headerCanvas.id) }}>
+                    {openCanvas ? 'Canvas preview' : 'Open canvas'}
+                  </button>
+                ) : null}
+                <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); onShare() }}>Share</button>
+                <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); onDesktop() }}>Computer</button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </header>
 
@@ -176,7 +246,8 @@ export function Chat({
         ))}
         <button type="button" className="room-tab room-tab--new" onClick={onNewRoom}>
           <PlusIcon />
-          New room
+          <span className="room-tab__desktop">New room</span>
+          <span className="room-tab__phone">New group chat</span>
         </button>
       </div>
       {archivedRooms.length > 0 ? (
@@ -277,17 +348,6 @@ function FeedRow({
     case 'message':
       return (
         <article className={`grok-message grok-message--${item.id}`}>
-          <div className="grok-message__actions">
-            <IconButton label="Add reaction" onClick={onReaction}>
-              <SmileIcon />
-            </IconButton>
-            <IconButton label="Reply" onClick={onReply}>
-              <ReplyIcon />
-            </IconButton>
-            <IconButton label="More actions" onClick={onMore}>
-              <DotsIcon />
-            </IconButton>
-          </div>
           <div className="grok-message__content">
             {item.blocks.map((block, index) => (
               <p key={index}>
@@ -314,6 +374,17 @@ function FeedRow({
                 ))}
               </p>
             ) : null}
+          </div>
+          <div className="grok-message__actions">
+            <IconButton label="Add reaction" onClick={onReaction}>
+              <SmileIcon />
+            </IconButton>
+            <IconButton label="Reply" onClick={onReply}>
+              <ReplyIcon />
+            </IconButton>
+            <IconButton label="More actions" onClick={onMore}>
+              <DotsIcon />
+            </IconButton>
           </div>
         </article>
       )

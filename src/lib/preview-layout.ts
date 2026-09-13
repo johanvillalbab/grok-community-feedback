@@ -1,6 +1,16 @@
+import { isPhoneLayout } from './viewport'
+
 const APP_SCALE = 1.3
 const CHAT_MIN = 340
 const PREVIEW_MIN = 280
+
+export function layoutScale() {
+  return isPhoneLayout() ? 1 : APP_SCALE
+}
+
+export function layoutWidth() {
+  return window.innerWidth / layoutScale()
+}
 export const BOT_FACE = 32
 export const SIDEBAR_EXPANDED = 256
 export const SIDEBAR_COLLAPSED = 56
@@ -9,19 +19,21 @@ export const SIDEBAR_MAX = 300
 const SIDEBAR_WIDTH = SIDEBAR_EXPANDED
 
 export function defaultPreviewWidth() {
-  const layoutWidth = window.innerWidth / APP_SCALE
+  const width = layoutWidth()
+  if (isPhoneLayout()) return Math.round(width)
   return clampPreviewWidth(
-    Math.min(440, layoutWidth * 0.42),
-    layoutWidth,
+    Math.min(440, width * 0.42),
+    width,
     SIDEBAR_WIDTH,
   )
 }
 
 export function defaultCanvasWidth() {
-  const layoutWidth = window.innerWidth / APP_SCALE
+  const width = layoutWidth()
+  if (isPhoneLayout()) return Math.round(width)
   return clampPreviewWidth(
-    Math.min(560, layoutWidth * 0.52),
-    layoutWidth,
+    Math.min(560, width * 0.52),
+    width,
     SIDEBAR_WIDTH,
   )
 }
@@ -41,8 +53,9 @@ export function clampPreviewWidth(
 export const PREVIEW_MIN_WIDTH = PREVIEW_MIN
 
 export function defaultSidebarWidth() {
-  const layoutWidth = window.innerWidth / APP_SCALE
-  return layoutWidth < 660 ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED
+  if (isPhoneLayout()) return SIDEBAR_EXPANDED
+  const width = layoutWidth()
+  return width < 660 ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED
 }
 
 export function isSidebarCollapsed(width: number) {

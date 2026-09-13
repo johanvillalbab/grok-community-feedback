@@ -255,6 +255,15 @@ export function ArchiveIcon({ className }: IconProps) {
   )
 }
 
+export function BellIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M6 16.5h12l-1.2-1.6V11a4.8 4.8 0 0 0-9.6 0v3.9Z" />
+      <path d="M10 16.5a2 2 0 0 0 4 0" />
+    </Icon>
+  )
+}
+
 export function ShieldIcon({ className }: IconProps) {
   return (
     <Icon className={className}>

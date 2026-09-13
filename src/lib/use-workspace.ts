@@ -87,7 +87,10 @@ export function useWorkspace() {
   const [previewWidth, setPreviewWidth] = useState(defaultPreviewWidth)
   const [sidebarWidth, setSidebarWidth] = useState(defaultSidebarWidth)
   const [liveMessage, setLiveMessage] = useState('')
+  const [navOpen, setNavOpen] = useState(false)
+  const [activeGoalId, setActiveGoalId] = useState<string | undefined>()
   const [seed] = useState(loadPersistedWorkspace)
+  const [notifyGlobal, setNotifyGlobal] = useState(() => seed.notifyGlobal ?? true)
   const [permissions, setPermissions] = useState<Record<AgentKey, BotPermission>>(() => ({
     ...DEFAULT_PERMISSIONS,
     ...seed.permissions,
@@ -121,6 +124,7 @@ export function useWorkspace() {
       installedListingIds,
       instrumentedEvents,
       createdGoals,
+      notifyGlobal,
     }
     savePersistedWorkspace(next)
   }, [
@@ -130,6 +134,7 @@ export function useWorkspace() {
     createdThreads,
     dismissedDigestIds,
     createdGoals,
+    notifyGlobal,
     extraFeedItems,
     extraRoomItems,
     installedListingIds,
@@ -170,6 +175,17 @@ export function useWorkspace() {
   const announce = useCallback((message: string) => {
     setLiveMessage(message)
   }, [])
+
+  const announceAfterPaint = useCallback((message: string) => {
+    requestAnimationFrame(() => {
+      setLiveMessage('')
+      requestAnimationFrame(() => setLiveMessage(message))
+    })
+  }, [])
+
+  const closeNav = useCallback(() => setNavOpen(false), [])
+  const openNav = useCallback(() => setNavOpen(true), [])
+  const toggleNav = useCallback(() => setNavOpen((open) => !open), [])
 
   const track = useCallback((
     event: InstrumentationEventName,
@@ -219,8 +235,8 @@ export function useWorkspace() {
     setArtifact({ kind: 'file', id })
     const next = FILES[id]
     track('artifact_opened', `Opened file ${next?.name ?? id}.`, { fileId: id, threadId: conversation.id })
-    if (next) setLiveMessage(`Preview open: ${next.name}`)
-  }, [artifact, conversation.id, track])
+    if (next) announceAfterPaint(`Preview open: ${next.name}`)
+  }, [announceAfterPaint, artifact, conversation.id, track])
 
   const openCanvas = useCallback((id: string) => {
     if (artifact?.kind === 'canvas' && artifact.id === id) {
@@ -232,8 +248,8 @@ export function useWorkspace() {
     setArtifact({ kind: 'canvas', id })
     const next = CANVASES[id]
     track('artifact_opened', `Opened canvas ${next?.title ?? id}.`, { canvasId: id, threadId: conversation.id })
-    if (next) setLiveMessage(`Canvas open: ${next.title}`)
-  }, [artifact, closeArtifact, conversation.id, track])
+    if (next) announceAfterPaint(`Canvas open: ${next.title}`)
+  }, [announceAfterPaint, artifact, closeArtifact, conversation.id, track])
 
   const openSurface = useCallback((next: WorkspaceSurface) => {
     if (next.kind === 'digest' && surface.kind !== 'digest') {
@@ -245,6 +261,8 @@ export function useWorkspace() {
     }
     setSurface(next)
     setActiveRoomId(null)
+    setNavOpen(false)
+    if (next.kind === 'goals') setActiveGoalId(next.goalId)
     if (next.kind !== 'chat') setModal(null)
     switch (next.kind) {
       case 'chat':
@@ -288,8 +306,24 @@ export function useWorkspace() {
     setActiveRoomId(roomId ?? null)
     setSurface({ kind: 'chat' })
     setArtifact(null)
+    setNavOpen(false)
     setLiveMessage(roomId ? `${next.title}: side room` : `${next.parentTitle}: ${next.title}`)
   }, [activeId, rooms, surface.kind, track, workspace])
+
+  const openAtlasThread = useCallback(() => {
+    const nextWorkspace = mergeWorkspace(getWorkspace(DEFAULT_WORKSPACE_ID), createdThreads)
+    const nextThread = findThread(nextWorkspace, DEFAULT_CONVERSATION_ID) ?? firstThread(nextWorkspace)
+    setWorkspaceId(nextWorkspace.id)
+    setActiveId(nextThread.id)
+    setActiveRoomId(null)
+    setSurface({ kind: 'chat' })
+    setArtifact(null)
+    setNavOpen(false)
+    if (nextWorkspace.id !== workspaceId || nextThread.id !== activeId) {
+      track('context_changed', `Opened Atlas thread ${nextThread.parentTitle}: ${nextThread.title}.`, { threadId: nextThread.id })
+    }
+    setLiveMessage(`Atlas · ${nextThread.parentTitle}: ${nextThread.title}`)
+  }, [activeId, createdThreads, track, workspaceId])
 
   const changeWorkspace = useCallback((id: string) => {
     const nextWorkspace = mergeWorkspace(getWorkspace(id), createdThreads)
@@ -299,6 +333,7 @@ export function useWorkspace() {
     setActiveRoomId(null)
     setSurface({ kind: 'chat' })
     setArtifact(null)
+    setNavOpen(false)
     track('context_changed', `Switched workspace to ${nextWorkspace.name}. ${nextThread.parentTitle}: ${nextThread.title}.`, { threadId: nextThread.id })
     setLiveMessage(`Workspace: ${nextWorkspace.name}. ${nextThread.parentTitle}: ${nextThread.title}`)
   }, [activeId, createdThreads, track])
@@ -516,6 +551,7 @@ export function useWorkspace() {
     setCreatedGoals((current) => [goal, ...current])
     track('goal_created', `Created “${title}” in ${workspace.name}.`, { goalId: id, threadId: conversation.id })
     setModal(null)
+    setActiveGoalId(id)
     setSurface({ kind: 'goals', goalId: id })
     setLiveMessage(`Goal created: ${title}`)
   }, [conversation.id, track, workspace.id, workspace.name])
@@ -543,6 +579,9 @@ export function useWorkspace() {
     previewWidth,
     sidebarWidth,
     liveMessage,
+    navOpen,
+    activeGoalId,
+    notifyGlobal,
     permissions,
     reactions,
     activity,
@@ -552,12 +591,17 @@ export function useWorkspace() {
     setPreviewWidth,
     setSidebarWidth,
     announce,
+    openNav,
+    closeNav,
+    toggleNav,
+    setNotifyGlobal,
     openFile,
     openCanvas,
     closeArtifact,
     openSurface,
     selectThread,
     changeWorkspace,
+    openAtlasThread,
     setModal,
     setActiveRoomId,
     selectRoom,

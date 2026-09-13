@@ -167,6 +167,9 @@ export default function App() {
           onOpenFile={workspace.openFile}
           onOpenGoal={(goalId) => workspace.openSurface({ kind: 'goals', goalId })}
           onSetApproval={workspace.setApproval}
+          onOpenGoals={() => workspace.openSurface({ kind: 'goals' })}
+          onOpenSettings={() => workspace.openSettings('autonomy')}
+          onOpenDigest={() => workspace.openSurface({ kind: 'digest' })}
         />
         </SurfaceFrame>
       ) : null}

@@ -3215,6 +3215,10 @@ body.is-resizing {
   margin-bottom: 10px;
 }
 
+.activity-instrument-note--short {
+  display: none;
+}
+
 .surface-sheet {
   position: fixed;
   inset: 0;
@@ -3477,6 +3481,31 @@ body.is-resizing {
 
   .workspace-screen .chat-scroll {
     padding: 14px 14px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .activity-instrument-note--full {
+    display: none;
+  }
+
+  .activity-instrument-note--short {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .workspace-toolbar {
+    padding: 8px 12px 0;
+  }
+
+  .workspace-toolbar .activity-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+  }
+
+  .workspace-toolbar .activity-filters .filter-chip {
+    flex: 0 0 auto;
   }
 
   .grok-message,

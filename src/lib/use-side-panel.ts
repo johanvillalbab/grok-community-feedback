@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent, type KeyboardEvent } from 'react'
 import { clampPreviewWidth, maxPreviewWidth, PREVIEW_MIN_WIDTH, SIDEBAR_EXPANDED } from './preview-layout'
+import { isPhoneLayout } from './viewport'
 
 type DragState = {
   startX: number
@@ -16,7 +17,7 @@ export function useSidePanel(onWidthChange: (width: number) => void) {
       const panel = panelRef.current
       const app = panel?.parentElement
       if (!panel || !app) return
-      if (app.classList.contains('grok-app--phone')) return
+      if (isPhoneLayout() || app.classList.contains('grok-app--phone')) return
       const sidebarWidth = readSidebarWidth(app)
       setValueMax(maxPreviewWidth(app.clientWidth, sidebarWidth))
       onWidthChange(clampPreviewWidth(panel.offsetWidth, app.clientWidth, sidebarWidth))

@@ -15,6 +15,13 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
   if (!modal) return null
 
   switch (modal.kind) {
+    case 'new-goal':
+      return (
+        <NewGoalModal
+          onClose={() => workspace.setModal(null)}
+          onCreate={workspace.createGoal}
+        />
+      )
     case 'new-thread':
       return <NewThreadModal workspace={workspace.workspace} onClose={() => workspace.setModal(null)} onCreate={workspace.createThread} />
     case 'share':
@@ -126,6 +133,43 @@ export function WorkspaceModals({ workspace }: WorkspaceModalsProps) {
       return exhaustive
     }
   }
+}
+
+function NewGoalModal({
+  onClose,
+  onCreate,
+}: {
+  onClose: () => void
+  onCreate: (title: string) => void
+}) {
+  const [title, setTitle] = useState('')
+  return (
+    <ModalShell
+      title="New sample goal"
+      subtitle="Creates a mock goal and writes goal_created to the Activity log."
+      onClose={onClose}
+      footer={(
+        <button
+          type="button"
+          className="ws-button"
+          disabled={!title.trim()}
+          onClick={() => onCreate(title.trim())}
+        >
+          Create goal
+        </button>
+      )}
+    >
+      <label className="ws-field">
+        <span>Title</span>
+        <input
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Name the leftover preview artifact"
+        />
+      </label>
+      <p>The goal stays in this browser. Open Activity afterward to see <code>goal_created</code>.</p>
+    </ModalShell>
+  )
 }
 
 function NewThreadModal({

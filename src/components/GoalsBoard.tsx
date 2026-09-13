@@ -9,7 +9,9 @@ type GoalsBoardProps = {
   workspaceId: string
   workspaceName: string
   selectedId?: string
+  extraGoals: ProductGoal[]
   onSelect: (goalId: string) => void
+  onCreate: () => void
   onOpenThread: (threadId: string) => void
   onOpenCanvas: (canvasId: string) => void
 }
@@ -18,11 +20,16 @@ export function GoalsBoard({
   workspaceId,
   workspaceName,
   selectedId,
+  extraGoals,
   onSelect,
+  onCreate,
   onOpenThread,
   onOpenCanvas,
 }: GoalsBoardProps) {
-  const goals = goalsForWorkspace(workspaceId)
+  const goals = [
+    ...extraGoals.filter((goal) => goal.workspaceId === workspaceId),
+    ...goalsForWorkspace(workspaceId),
+  ]
   const selected = goals.find((goal) => goal.id === selectedId) ?? goals[0]
 
   return (
@@ -30,9 +37,14 @@ export function GoalsBoard({
       title="Goals"
       parent={`${workspaceName} · sample roadmap`}
       icon={<FlagIcon />}
+      actions={(
+        <button type="button" className="ws-button ws-button--tiny" onClick={onCreate}>
+          New sample goal
+        </button>
+      )}
     >
       {goals.length === 0 ? (
-        <EmptyGoals />
+        <EmptyGoals onCreate={onCreate} />
       ) : (
         <div className="goals-layout">
           <ul className="goals-list" aria-label="Product goals">
@@ -116,11 +128,12 @@ function GoalDetail({
   )
 }
 
-function EmptyGoals() {
+function EmptyGoals({ onCreate }: { onCreate: () => void }) {
   return (
     <div className="workspace-empty">
       <h2>No sample goals in this workspace</h2>
       <p>Atlas, Masterclass, and Craft Lab each ship with a short fictional roadmap.</p>
+      <button type="button" className="ws-button" onClick={onCreate}>New sample goal</button>
     </div>
   )
 }

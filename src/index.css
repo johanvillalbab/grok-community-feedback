@@ -2852,6 +2852,29 @@ body.is-resizing {
   gap: 10px;
 }
 
+.activity-instrument-note {
+  margin: 0 0 12px;
+  color: #9a9a9a;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.activity-instrument-note code,
+.activity-event {
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.activity-event {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: #2a2438;
+  color: #c4b5fd;
+}
+
 .activity-item__body {
   min-width: 0;
   flex: 1;

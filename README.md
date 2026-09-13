@@ -25,6 +25,7 @@ I built it with the same care I bring to my role as a SpaceX and AI community am
 - Side rooms so a theme can fork off the main thread without losing it
 - Autonomy and permission settings for each bot, saved in this browser only
 - Artifacts plus a Proactive digest that suggests next moves from sample feedback clusters
+- Mock instrumentation events that appear in the Activity log after you use the matching screen
 
 ## Community request: Canvas
 
@@ -54,6 +55,7 @@ Everything below is mock data. Nothing is sent to a network.
 3. Click the Design Engineer avatar in the chat header, then **Activity log**. Approve or dismiss a waiting item. Filter by bot.
 4. Open **Digest**, then a card’s artifact or goal. **Artifacts** lists the same canvases, files, and the Preview cluster brief.
 5. Open **Sho V.** → **Autonomy** and **Permissions**. Change a bot’s level or a toggle, refresh, and confirm it stays. **Marketplace** installs sample bots only.
+6. Instrumentation walk (configured → used → saw what happened): create a sample goal, change autonomy, toggle a permission, switch a thread or workspace, open a side room, open a file or canvas, open Digest, then open **Activity**. Filter **Events**. The log shows `goal_created`, `autonomy_changed`, `permission_toggled`, `context_changed`, `side_chat_opened`, `artifact_opened`, `digest_viewed`, and `activity_log_opened`.
 
 Other wired surfaces: **New thread** (`+`), **Channels**, **Share**, **Open in desktop**, **Add file**, **Voice message**, reactions, reply, and message more-actions. Search empty states offer Goals and Digest.
 

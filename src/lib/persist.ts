@@ -1,9 +1,11 @@
 import type {
+  ActivityItem,
   AgentKey,
   ApprovalState,
   BotPermission,
   CreatedThread,
   FeedItem,
+  ProductGoal,
   SideRoom,
 } from '../types'
 
@@ -21,6 +23,8 @@ export type PersistedWorkspace = {
   approvals?: Record<string, ApprovalState>
   dismissedDigestIds?: string[]
   installedListingIds?: string[]
+  instrumentedEvents?: ActivityItem[]
+  createdGoals?: ProductGoal[]
 }
 
 export function loadPersistedWorkspace(): PersistedWorkspace {

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  AGENT_META,
   CANVASES,
   DEFAULT_CONVERSATION_ID,
   DEFAULT_WORKSPACE_ID,
@@ -16,6 +17,7 @@ import {
 import { loadPersistedWorkspace, savePersistedWorkspace, type PersistedWorkspace } from './persist'
 import { findThread, firstThread, getWorkspace } from './workspace-nav'
 import type {
+  ActivityItem,
   AgentKey,
   ApprovalState,
   AutonomyLevel,
@@ -23,7 +25,9 @@ import type {
   BotPermission,
   CreatedThread,
   FeedItem,
+  InstrumentationEventName,
   OpenArtifact,
+  ProductGoal,
   SettingsSection,
   SideRoom,
   Workspace,
@@ -98,6 +102,8 @@ export function useWorkspace() {
   const [approvals, setApprovals] = useState<Record<string, ApprovalState>>(() => seed.approvals ?? {})
   const [dismissedDigestIds, setDismissedDigestIds] = useState<string[]>(() => seed.dismissedDigestIds ?? [])
   const [installedListingIds, setInstalledListingIds] = useState<string[]>(() => seed.installedListingIds ?? [])
+  const [instrumentedEvents, setInstrumentedEvents] = useState<ActivityItem[]>(() => seed.instrumentedEvents ?? [])
+  const [createdGoals, setCreatedGoals] = useState<ProductGoal[]>(() => seed.createdGoals ?? [])
   const openerRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -113,6 +119,8 @@ export function useWorkspace() {
       approvals,
       dismissedDigestIds,
       installedListingIds,
+      instrumentedEvents,
+      createdGoals,
     }
     savePersistedWorkspace(next)
   }, [
@@ -121,9 +129,11 @@ export function useWorkspace() {
     createdRooms,
     createdThreads,
     dismissedDigestIds,
+    createdGoals,
     extraFeedItems,
     extraRoomItems,
     installedListingIds,
+    instrumentedEvents,
     permissions,
     reactions,
     roomTitles,
@@ -161,6 +171,26 @@ export function useWorkspace() {
     setLiveMessage(message)
   }, [])
 
+  const track = useCallback((
+    event: InstrumentationEventName,
+    detail: string,
+    extras?: Pick<ActivityItem, 'goalId' | 'canvasId' | 'fileId' | 'threadId'>,
+  ) => {
+    const item: ActivityItem = {
+      id: `evt-${event}-${Date.now()}`,
+      workspaceId,
+      agent: 'user',
+      kind: 'instrument',
+      event,
+      title: event,
+      detail,
+      time: 'just now',
+      ...extras,
+    }
+    setInstrumentedEvents((current) => [item, ...current].slice(0, 80))
+    setLiveMessage(`Event ${event}`)
+  }, [workspaceId])
+
   const rememberOpener = () => {
     const active = document.activeElement
     if (active instanceof HTMLElement) openerRef.current = active
@@ -188,8 +218,9 @@ export function useWorkspace() {
     if (!artifact) setPreviewWidth(defaultPreviewWidth())
     setArtifact({ kind: 'file', id })
     const next = FILES[id]
+    track('artifact_opened', `Opened file ${next?.name ?? id}.`, { fileId: id, threadId: conversation.id })
     if (next) setLiveMessage(`Preview open: ${next.name}`)
-  }, [artifact])
+  }, [artifact, conversation.id, track])
 
   const openCanvas = useCallback((id: string) => {
     if (artifact?.kind === 'canvas' && artifact.id === id) {
@@ -200,10 +231,18 @@ export function useWorkspace() {
     if (!artifact) setPreviewWidth(defaultCanvasWidth())
     setArtifact({ kind: 'canvas', id })
     const next = CANVASES[id]
+    track('artifact_opened', `Opened canvas ${next?.title ?? id}.`, { canvasId: id, threadId: conversation.id })
     if (next) setLiveMessage(`Canvas open: ${next.title}`)
-  }, [artifact, closeArtifact])
+  }, [artifact, closeArtifact, conversation.id, track])
 
   const openSurface = useCallback((next: WorkspaceSurface) => {
+    if (next.kind === 'digest' && surface.kind !== 'digest') {
+      track('digest_viewed', `Opened the proactive digest in ${workspace.name}.`)
+    }
+    if (next.kind === 'activity' && surface.kind !== 'activity') {
+      const who = next.agent ? ` for ${AGENT_META[next.agent].label}` : ''
+      track('activity_log_opened', `Opened the activity log${who} in ${workspace.name}.`)
+    }
     setSurface(next)
     setActiveRoomId(null)
     if (next.kind !== 'chat') setModal(null)
@@ -234,16 +273,23 @@ export function useWorkspace() {
         return exhaustive
       }
     }
-  }, [conversation.parentTitle, conversation.title])
+  }, [conversation.parentTitle, conversation.title, surface.kind, track, workspace.name])
 
   const selectThread = useCallback((id: string, roomId?: string | null) => {
     const next = findThread(workspace, id) ?? firstThread(workspace)
+    if (next.id !== activeId || surface.kind !== 'chat') {
+      track('context_changed', `Opened ${next.parentTitle}: ${next.title}.`, { threadId: next.id })
+    }
+    if (roomId) {
+      const room = rooms.find((item) => item.id === roomId)
+      track('side_chat_opened', `Opened “${room?.title ?? 'side room'}” on ${next.title}.`, { threadId: next.id })
+    }
     setActiveId(next.id)
     setActiveRoomId(roomId ?? null)
     setSurface({ kind: 'chat' })
     setArtifact(null)
     setLiveMessage(roomId ? `${next.title}: side room` : `${next.parentTitle}: ${next.title}`)
-  }, [workspace])
+  }, [activeId, rooms, surface.kind, track, workspace])
 
   const changeWorkspace = useCallback((id: string) => {
     const nextWorkspace = mergeWorkspace(getWorkspace(id), createdThreads)
@@ -253,8 +299,9 @@ export function useWorkspace() {
     setActiveRoomId(null)
     setSurface({ kind: 'chat' })
     setArtifact(null)
+    track('context_changed', `Switched workspace to ${nextWorkspace.name}. ${nextThread.parentTitle}: ${nextThread.title}.`, { threadId: nextThread.id })
     setLiveMessage(`Workspace: ${nextWorkspace.name}. ${nextThread.parentTitle}: ${nextThread.title}`)
-  }, [activeId, createdThreads])
+  }, [activeId, createdThreads, track])
 
   const appendMessage = useCallback((target: { threadId?: string; roomId?: string }, text: string, extras?: InlineExtras) => {
     const blocks: FeedItem = {
@@ -336,8 +383,9 @@ export function useWorkspace() {
     setActiveRoomId(id)
     setSurface({ kind: 'chat' })
     setModal(null)
+    track('side_chat_opened', `Opened “${title}” on ${conversation.title}.`, { threadId })
     setLiveMessage(`Side room: ${title}`)
-  }, [conversation.id, workspace.id])
+  }, [conversation.id, conversation.title, track, workspace.id])
 
   const renameRoom = useCallback((roomId: string, title: string) => {
     setRoomTitles((current) => ({ ...current, [roomId]: title }))
@@ -380,28 +428,35 @@ export function useWorkspace() {
         requireApproval: current[agent]?.requireApproval ?? permissionFor(agent, autonomy).requireApproval,
       },
     }))
+    track('autonomy_changed', `${AGENT_META[agent].label} set to ${autonomy}.`)
     setLiveMessage(`Autonomy updated`)
-  }, [])
+  }, [track])
 
   const toggleCapability = useCallback((agent: AgentKey, capability: BotCapability) => {
-    setPermissions((current) => {
-      const row = current[agent] ?? permissionFor(agent)
-      return {
-        ...current,
-        [agent]: {
-          ...row,
-          capabilities: { ...row.capabilities, [capability]: !row.capabilities[capability] },
+    const row = permissions[agent] ?? permissionFor(agent)
+    const nextValue = !row.capabilities[capability]
+    setPermissions((current) => ({
+      ...current,
+      [agent]: {
+        ...(current[agent] ?? permissionFor(agent)),
+        capabilities: {
+          ...(current[agent] ?? permissionFor(agent)).capabilities,
+          [capability]: nextValue,
         },
-      }
-    })
-  }, [])
+      },
+    }))
+    track('permission_toggled', `${AGENT_META[agent].label}: ${capabilityLabel(capability)} ${nextValue ? 'on' : 'off'}.`)
+  }, [permissions, track])
 
   const toggleApprovalRequired = useCallback((agent: AgentKey) => {
-    setPermissions((current) => {
-      const row = current[agent] ?? permissionFor(agent)
-      return { ...current, [agent]: { ...row, requireApproval: !row.requireApproval } }
-    })
-  }, [])
+    const row = permissions[agent] ?? permissionFor(agent)
+    const nextValue = !row.requireApproval
+    setPermissions((current) => ({
+      ...current,
+      [agent]: { ...(current[agent] ?? permissionFor(agent)), requireApproval: nextValue },
+    }))
+    track('permission_toggled', `${AGENT_META[agent].label}: approval required ${nextValue ? 'on' : 'off'}.`)
+  }, [permissions, track])
 
   const dismissDigest = useCallback((id: string) => {
     setDismissedDigestIds((current) => current.includes(id) ? current : [...current, id])
@@ -429,9 +484,48 @@ export function useWorkspace() {
     openSurface({ kind: 'settings', section })
   }, [openSurface])
 
-  const activity = useMemo(() => ACTIVITY.map((item) => (
-    item.approval ? { ...item, approval: approvals[item.id] ?? item.approval } : item
-  )), [approvals])
+  const selectRoom = useCallback((roomId: string | null) => {
+    setActiveRoomId(roomId)
+    if (!roomId) return
+    const room = rooms.find((item) => item.id === roomId)
+    track('side_chat_opened', `Opened “${room?.title ?? 'side room'}” on ${conversation.title}.`, {
+      threadId: conversation.id,
+    })
+  }, [conversation.id, conversation.title, rooms, track])
+
+  const createGoal = useCallback((title: string) => {
+    const id = `local-goal-${Date.now()}`
+    const goal: ProductGoal = {
+      id,
+      workspaceId: workspace.id,
+      title,
+      summary: 'Sample goal created in this browser. Not a live roadmap item.',
+      owner: 'user',
+      collaborators: ['pm', 'community'],
+      status: 'planned',
+      progress: 0,
+      threadId: conversation.id,
+      plan: [{
+        id: `${id}-step`,
+        title: 'Draft the brief',
+        owner: 'user',
+        status: 'planned',
+        note: 'Created from the Goals board so the demo can show goal_created in Activity.',
+      }],
+    }
+    setCreatedGoals((current) => [goal, ...current])
+    track('goal_created', `Created “${title}” in ${workspace.name}.`, { goalId: id, threadId: conversation.id })
+    setModal(null)
+    setSurface({ kind: 'goals', goalId: id })
+    setLiveMessage(`Goal created: ${title}`)
+  }, [conversation.id, track, workspace.id, workspace.name])
+
+  const activity = useMemo(() => {
+    const seeded = ACTIVITY.map((item) => (
+      item.approval ? { ...item, approval: approvals[item.id] ?? item.approval } : item
+    ))
+    return [...instrumentedEvents, ...seeded]
+  }, [approvals, instrumentedEvents])
 
   return {
     workspace,
@@ -454,6 +548,7 @@ export function useWorkspace() {
     activity,
     dismissedDigestIds,
     installedListingIds,
+    createdGoals,
     setPreviewWidth,
     setSidebarWidth,
     announce,
@@ -465,6 +560,8 @@ export function useWorkspace() {
     changeWorkspace,
     setModal,
     setActiveRoomId,
+    selectRoom,
+    createGoal,
     appendMessage,
     createThread,
     createRoom,
@@ -479,6 +576,23 @@ export function useWorkspace() {
     dismissDigest,
     toggleListing,
     openSettings,
+  }
+}
+
+function capabilityLabel(capability: BotCapability) {
+  switch (capability) {
+    case 'readFeedback':
+      return 'read feedback'
+    case 'propose':
+      return 'propose'
+    case 'attachCanvas':
+      return 'attach Canvas'
+    case 'notify':
+      return 'notify'
+    default: {
+      const exhaustive: never = capability
+      return exhaustive
+    }
   }
 }
 

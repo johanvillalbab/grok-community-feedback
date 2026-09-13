@@ -136,6 +136,7 @@ export type WorkspaceSurface =
   | { kind: 'settings'; section: SettingsSection }
 
 export type WorkspaceModal =
+  | { kind: 'new-goal' }
   | { kind: 'new-thread' }
   | { kind: 'share' }
   | { kind: 'desktop' }
@@ -173,7 +174,20 @@ export type ProductGoal = {
   plan: GoalStep[]
 }
 
-export type ActivityKind = 'action' | 'artifact' | 'approval' | 'background'
+export const INSTRUMENTATION_EVENTS = [
+  'goal_created',
+  'autonomy_changed',
+  'permission_toggled',
+  'context_changed',
+  'side_chat_opened',
+  'artifact_opened',
+  'digest_viewed',
+  'activity_log_opened',
+] as const
+
+export type InstrumentationEventName = (typeof INSTRUMENTATION_EVENTS)[number]
+
+export type ActivityKind = 'action' | 'artifact' | 'approval' | 'background' | 'instrument'
 
 export type ApprovalState = 'waiting' | 'approved' | 'dismissed'
 
@@ -190,6 +204,7 @@ export type ActivityItem = {
   fileId?: string
   threadId?: string
   approval?: ApprovalState
+  event?: InstrumentationEventName
 }
 
 export type SideRoomStatus = 'open' | 'archived'

@@ -48,7 +48,7 @@ export default function App() {
           onOpenFile={workspace.openFile}
           onOpenCanvas={workspace.openCanvas}
           onOpenGoal={(goalId) => workspace.openSurface({ kind: 'goals', goalId: goalId || undefined })}
-          onSelectRoom={(roomId) => workspace.setActiveRoomId(roomId)}
+          onSelectRoom={workspace.selectRoom}
           onNewRoom={() => workspace.setModal({ kind: 'new-room' })}
           onRenameRoom={(roomId) => workspace.setModal({ kind: 'rename-room', roomId })}
           onArchiveRoom={workspace.archiveRoom}
@@ -81,7 +81,9 @@ export default function App() {
           workspaceId={workspace.workspace.id}
           workspaceName={workspace.workspace.name}
           selectedId={workspace.surface.goalId}
+          extraGoals={workspace.createdGoals}
           onSelect={(goalId) => workspace.openSurface({ kind: 'goals', goalId })}
+          onCreate={() => workspace.setModal({ kind: 'new-goal' })}
           onOpenThread={(threadId) => workspace.selectThread(threadId)}
           onOpenCanvas={workspace.openCanvas}
         />

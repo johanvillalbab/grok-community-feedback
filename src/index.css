@@ -15,6 +15,15 @@
   --color-soft: #dadada;
 }
 
+:root {
+  --text-title: 13px;
+  --text-title-lh: 17px;
+  --text-body: 12px;
+  --text-body-lh: 18px;
+  --text-meta: 11px;
+  --text-kicker: 10px;
+}
+
 html,
 body,
 #root {
@@ -919,9 +928,9 @@ body.is-resizing .sidebar-resizer::after {
   margin: 0;
   overflow: hidden;
   color: #eee;
-  font-size: 13px;
+  font-size: var(--text-title);
   font-weight: 600;
-  line-height: 17px;
+  line-height: var(--text-title-lh);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2575,6 +2584,8 @@ body.is-resizing {
 
 .workspace-screen .chat-scroll {
   padding: 12px 16px 32px;
+  font-size: var(--text-body);
+  line-height: var(--text-body-lh);
 }
 
 .workspace-sample-note {
@@ -2596,19 +2607,21 @@ body.is-resizing {
 .settings-pane h2 {
   margin: 0 0 6px;
   color: #eee;
-  font-size: 16px;
+  font-size: var(--text-title);
   font-weight: 600;
+  line-height: var(--text-title-lh);
 }
 
 .workspace-empty p,
 .goal-detail p,
 .artifact-detail p,
 .market-detail p,
-.settings-pane p {
+.settings-pane p,
+.digest-card > p {
   margin: 0 0 8px;
   color: #b0b0b0;
-  font-size: 12px;
-  line-height: 18px;
+  font-size: var(--text-body);
+  line-height: var(--text-body-lh);
 }
 
 .workspace-screen__icon {
@@ -2671,7 +2684,16 @@ body.is-resizing {
   display: block;
   margin: 6px 0 4px;
   color: #fff;
-  font-size: 13px;
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: var(--text-title-lh);
+}
+
+.goal-plan strong {
+  color: #fff;
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: var(--text-title-lh);
 }
 
 .goal-card__summary,
@@ -3005,7 +3027,9 @@ body.is-resizing {
 
 .ws-modal__header h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: var(--text-title-lh);
 }
 
 .ws-modal__header p,
@@ -3428,8 +3452,8 @@ body.is-resizing {
 
   .chat-header__identity h1,
   .workspace-screen .chat-header h1 {
-    font-size: 16px;
-    line-height: 20px;
+    font-size: 14px;
+    line-height: 18px;
   }
 
   .chat-header__parent {

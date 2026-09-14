@@ -23,6 +23,7 @@ import {
   PlusIcon,
   PulseIcon,
   SearchIcon,
+  ShieldIcon,
   SparkIcon,
 } from './Icons'
 
@@ -219,7 +220,7 @@ export function Sidebar({
                         aria-current={current ? 'page' : undefined}
                         aria-label={item.label}
                         title={collapsed ? item.label : undefined}
-                        onClick={() => onOpenSurface({ kind: item.kind })}
+                        onClick={() => openDestination(item.kind, onOpenSurface, onProfile)}
                       >
                         <item.icon />
                         <span>{item.label}</span>
@@ -458,7 +459,36 @@ const DESTINATIONS = [
   { kind: 'activity' as const, label: 'Activity', icon: PulseIcon },
   { kind: 'digest' as const, label: 'Digest', icon: SparkIcon },
   { kind: 'artifacts' as const, label: 'Artifacts', icon: LayersIcon },
+  { kind: 'settings' as const, label: 'Settings', icon: ShieldIcon },
 ]
+
+function openDestination(
+  kind: (typeof DESTINATIONS)[number]['kind'],
+  onOpenSurface: (surface: WorkspaceSurface) => void,
+  onProfile: () => void,
+) {
+  switch (kind) {
+    case 'goals':
+      onOpenSurface({ kind: 'goals' })
+      return
+    case 'activity':
+      onOpenSurface({ kind: 'activity' })
+      return
+    case 'digest':
+      onOpenSurface({ kind: 'digest' })
+      return
+    case 'artifacts':
+      onOpenSurface({ kind: 'artifacts' })
+      return
+    case 'settings':
+      onProfile()
+      return
+    default: {
+      const _exhaustive: never = kind
+      return _exhaustive
+    }
+  }
+}
 
 function matchesDestination(item: (typeof DESTINATIONS)[number], query: string) {
   const needle = query.trim().toLowerCase()

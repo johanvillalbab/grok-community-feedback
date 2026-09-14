@@ -2613,11 +2613,11 @@ body.is-resizing {
 }
 
 .workspace-empty p,
-.goal-detail p,
-.artifact-detail p,
-.market-detail p,
+.goal-detail p:not(.goal-detail__kicker):not(.goal-detail__owners):not(.goal-plan__owner),
+.artifact-detail p:not(.goal-detail__kicker):not(.artifact-detail__source),
+.market-detail p:not(.artifact-detail__source),
 .settings-pane p,
-.digest-card > p {
+.digest-card > p:not([class]) {
   margin: 0 0 8px;
   color: #b0b0b0;
   font-size: var(--text-body);

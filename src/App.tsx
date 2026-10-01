@@ -1,6 +1,7 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { ActivityLog } from './components/ActivityLog'
 import { ArtifactsView } from './components/ArtifactsView'
+import { applyTheme, readTheme, type Theme } from './lib/theme'
 import { CanvasPanel } from './components/CanvasPanel'
 import { Chat } from './components/Chat'
 import { DigestView } from './components/DigestView'
@@ -21,6 +22,7 @@ export default function App() {
   const previewOpen = Boolean(workspace.file || workspace.canvas)
   const sheetOpen = workspace.surface.kind !== 'chat'
   const { navOpen, closeNav, setSidebarWidth } = workspace
+  const [theme, setTheme] = useState<Theme>(() => readTheme())
 
   useEffect(() => {
     document.body.classList.toggle('is-phone', phone)
@@ -91,6 +93,13 @@ export default function App() {
         }}
         onMarketplace={() => workspace.openSurface({ kind: 'marketplace' })}
         onProfile={() => workspace.openSettings('profile')}
+        theme={theme}
+        onToggleTheme={() => {
+          const next = theme === 'light' ? 'dark' : 'light'
+          setTheme(next)
+          applyTheme(next)
+          workspace.announce(next === 'light' ? 'Light theme' : 'Dark theme')
+        }}
       />
       {workspace.surface.kind === 'chat' || phone ? (
         <Chat

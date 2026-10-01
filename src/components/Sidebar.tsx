@@ -25,6 +25,7 @@ import {
   SearchIcon,
   ShieldIcon,
   SparkIcon,
+  SunIcon,
 } from './Icons'
 
 type SidebarProps = {
@@ -46,6 +47,8 @@ type SidebarProps = {
   onCompose: () => void
   onMarketplace: () => void
   onProfile: () => void
+  theme: 'light' | 'dark'
+  onToggleTheme: () => void
 }
 
 export function Sidebar({
@@ -67,6 +70,8 @@ export function Sidebar({
   onCompose,
   onMarketplace,
   onProfile,
+  theme,
+  onToggleTheme,
 }: SidebarProps) {
   const { panelRef, resizerProps } = useSidebarPanel({ onWidthChange, onAnnounce })
   const listRef = useRef<HTMLElement>(null)
@@ -292,6 +297,16 @@ export function Sidebar({
         >
           <GridIcon />
           <span>Marketplace</span>
+        </button>
+        <button
+          type="button"
+          className={theme === 'light' ? 'sidebar-footer__item sidebar-footer__item--on' : 'sidebar-footer__item'}
+          aria-pressed={theme === 'light'}
+          aria-label="Light theme"
+          onClick={onToggleTheme}
+        >
+          <SunIcon />
+          <span>Light</span>
         </button>
         <button
           type="button"

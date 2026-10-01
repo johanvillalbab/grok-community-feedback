@@ -201,6 +201,22 @@ export function CheckIcon({ className }: IconProps) {
   )
 }
 
+export function SunIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <circle cx="12" cy="12" r="3.25" />
+      <path d="M12 3.2v2" />
+      <path d="M12 18.8v2" />
+      <path d="M3.2 12h2" />
+      <path d="M18.8 12h2" />
+      <path d="m6.1 6.1 1.4 1.4" />
+      <path d="m16.5 16.5 1.4 1.4" />
+      <path d="m17.9 6.1-1.4 1.4" />
+      <path d="m7.5 16.5-1.4 1.4" />
+    </Icon>
+  )
+}
+
 export function FileIcon({ className }: IconProps) {
   return (
     <Icon className={className}>

@@ -109,25 +109,32 @@ type BotFaceProps = {
 function BotFace({ shape, color, size, label, decorative }: BotFaceProps) {
   const face = opticalScale(shape)
   const eyes = size < 20 ? 1.12 : size >= 28 ? 1.08 : 1
+  const paper = isPaperFace(color)
+  const transform = `translate(20 20) scale(${face}) translate(-20 -20)`
 
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 40 40"
-      className="bot-face"
+      className={paper ? 'bot-face bot-face--paper' : 'bot-face'}
       role={decorative ? 'presentation' : 'img'}
       aria-hidden={decorative ? true : undefined}
       aria-label={decorative ? undefined : label}
     >
-      <g
-        fill={color}
-        stroke={color}
-        strokeWidth={shapeStroke(shape)}
-        strokeLinejoin="round"
-        transform={`translate(20 20) scale(${face}) translate(-20 -20)`}
-      >
-        <BotBody shape={shape} />
+      <g transform={transform}>
+        <g
+          className="bot-face__fill"
+          fill={color}
+          stroke={color}
+          strokeWidth={shapeStroke(shape)}
+          strokeLinejoin="round"
+        >
+          <BotBody shape={shape} />
+        </g>
+        <g className="bot-face__edge" strokeLinejoin="round">
+          <BotBody shape={shape} />
+        </g>
       </g>
       <g transform={`translate(20 20.2) rotate(-26) scale(${eyes})`} fill="#141414">
         <ellipse cx="-3.85" cy="0" rx="1.42" ry="3.35" />
@@ -135,6 +142,20 @@ function BotFace({ shape, color, size, label, decorative }: BotFaceProps) {
       </g>
     </svg>
   )
+}
+
+function isPaperFace(color: string) {
+  const hex = color.startsWith('#') ? color.slice(1) : ''
+  if (hex.length !== 6) return false
+  const value = Number.parseInt(hex, 16)
+  if (Number.isNaN(value)) return false
+  const channels = [(value >> 16) & 255, (value >> 8) & 255, value & 255]
+  const luminance = channels.reduce((sum, channel) => {
+    const s = channel / 255
+    const linear = s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+    return sum + linear
+  }, 0)
+  return luminance / 3 > 0.75
 }
 
 function BotBody({ shape }: { shape: BotShapeId }) {

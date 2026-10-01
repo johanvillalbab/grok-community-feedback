@@ -20,6 +20,7 @@ import {
   HashIcon,
   PlusIcon,
   SearchIcon,
+  SunIcon,
 } from './Icons'
 
 type SidebarProps = {
@@ -30,6 +31,8 @@ type SidebarProps = {
   onAnnounce?: (message: string) => void
   onSelect: (id: string) => void
   onWorkspaceChange: (id: string) => void
+  theme: 'light' | 'dark'
+  onToggleTheme: () => void
 }
 
 export function Sidebar({
@@ -40,6 +43,8 @@ export function Sidebar({
   onAnnounce,
   onSelect,
   onWorkspaceChange,
+  theme,
+  onToggleTheme,
 }: SidebarProps) {
   const { panelRef, resizerProps } = useSidebarPanel({ onWidthChange, onAnnounce })
   const listRef = useRef<HTMLElement>(null)
@@ -177,6 +182,16 @@ export function Sidebar({
         >
           <GridIcon />
           <span>Marketplace</span>
+        </button>
+        <button
+          type="button"
+          className={theme === 'light' ? 'sidebar-footer__item sidebar-footer__item--on' : 'sidebar-footer__item'}
+          aria-pressed={theme === 'light'}
+          aria-label="Light theme"
+          onClick={onToggleTheme}
+        >
+          <SunIcon />
+          <span>Light</span>
         </button>
         <button
           type="button"

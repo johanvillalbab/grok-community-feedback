@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { applyTheme, readTheme, type Theme } from './lib/theme'
 import { CanvasPanel } from './components/CanvasPanel'
 import { Chat } from './components/Chat'
 import { PreviewPanel } from './components/PreviewPanel'
@@ -15,6 +16,7 @@ export default function App() {
   const [previewWidth, setPreviewWidth] = useState(defaultPreviewWidth)
   const [sidebarWidth, setSidebarWidth] = useState(defaultSidebarWidth)
   const [liveMessage, setLiveMessage] = useState('')
+  const [theme, setTheme] = useState<Theme>(() => readTheme())
   const openerRef = useRef<HTMLElement | null>(null)
 
   const workspace = useMemo(() => getWorkspace(workspaceId), [workspaceId])
@@ -90,6 +92,13 @@ export default function App() {
           setActiveId(nextThread.id)
           setArtifact(null)
           setLiveMessage(`Workspace: ${nextWorkspace.name}. ${nextThread.parentTitle}: ${nextThread.title}`)
+        }}
+        theme={theme}
+        onToggleTheme={() => {
+          const next = theme === 'light' ? 'dark' : 'light'
+          setTheme(next)
+          applyTheme(next)
+          setLiveMessage(next === 'light' ? 'Light theme' : 'Dark theme')
         }}
       />
       <Chat

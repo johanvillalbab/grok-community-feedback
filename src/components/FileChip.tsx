@@ -10,15 +10,20 @@ type FileChipProps = {
 export function FileChip({ fileId, text, active = false, onOpen }: FileChipProps) {
   const file = fileId ? FILES[fileId] : undefined
   const label = file ? (text ?? file.path) : (text ?? '')
-  const openFile = file && onOpen ? onOpen : undefined
+  const interactive = Boolean(onOpen)
 
   const className = [
     'file-chip',
     active ? 'file-chip--active' : '',
-    openFile ? 'file-chip--interactive' : '',
+    interactive ? 'file-chip--interactive' : '',
   ].join(' ')
 
-  if (!openFile || !file) {
+  const activate = () => {
+    if (!onOpen) return
+    onOpen(file?.id ?? label)
+  }
+
+  if (!interactive) {
     return <span className={className}>{label}</span>
   }
 
@@ -28,12 +33,12 @@ export function FileChip({ fileId, text, active = false, onOpen }: FileChipProps
       role="button"
       tabIndex={0}
       aria-expanded={active}
-      aria-controls={active ? 'file-preview-panel' : undefined}
-      onClick={() => openFile(file.id)}
+      aria-controls={active && file ? 'file-preview-panel' : undefined}
+      onClick={activate}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()
-          openFile(file.id)
+          activate()
         }
       }}
     >

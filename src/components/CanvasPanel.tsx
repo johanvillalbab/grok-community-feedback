@@ -9,6 +9,7 @@ import { CloseIcon, CanvasIcon, PlanIcon } from './Icons'
 type CanvasPanelProps = {
   canvas: WorkspaceCanvas
   width: number
+  sheet?: boolean
   onWidthChange: (width: number) => void
   onClose: () => void
 }
@@ -16,7 +17,7 @@ type CanvasPanelProps = {
 const NODE_WIDTH = 128
 const NODE_HEIGHT = 52
 
-export function CanvasPanel({ canvas, width, onWidthChange, onClose }: CanvasPanelProps) {
+export function CanvasPanel({ canvas, width, sheet = false, onWidthChange, onClose }: CanvasPanelProps) {
   const { panelRef, resizerProps } = useSidePanel(onWidthChange)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const fallbackNodeId = canvas.gantt?.tasks.find((task) => task.status === 'active')?.id
@@ -49,15 +50,17 @@ export function CanvasPanel({ canvas, width, onWidthChange, onClose }: CanvasPan
       ref={panelRef}
       id="workspace-canvas-panel"
       aria-labelledby="workspace-canvas-title"
-      className="preview-panel canvas-panel"
-      style={{ width, flexBasis: width }}
+      className={sheet ? 'preview-panel canvas-panel preview-panel--sheet' : 'preview-panel canvas-panel'}
+      style={sheet ? undefined : { width, flexBasis: width }}
     >
-      <div
-        className="preview-panel__resizer"
-        aria-label="Resize canvas"
-        aria-valuenow={width}
-        {...resizerProps}
-      />
+      {sheet ? null : (
+        <div
+          className="preview-panel__resizer"
+          aria-label="Resize canvas"
+          aria-valuenow={width}
+          {...resizerProps}
+        />
+      )}
       <header className="preview-panel__header">
         <div className="preview-panel__heading">
           <p>
@@ -148,6 +151,37 @@ export function CanvasPanel({ canvas, width, onWidthChange, onClose }: CanvasPan
                   </li>
                 )
               })}
+            </ul>
+          </section>
+        ) : null}
+
+        {canvas.quotes ? (
+          <section className="canvas-section" aria-labelledby={`${canvas.id}-quotes-title`}>
+            <h2 id={`${canvas.id}-quotes-title`}>{canvas.quotes.title}</h2>
+            <ul className="canvas-quotes">
+              {canvas.quotes.items.map((item) => (
+                <li key={item.quote}>
+                  <blockquote>{item.quote}</blockquote>
+                  <cite>{item.source}</cite>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {canvas.checklist ? (
+          <section className="canvas-section" aria-labelledby={`${canvas.id}-check-title`}>
+            <h2 id={`${canvas.id}-check-title`}>{canvas.checklist.title}</h2>
+            <ul className="canvas-check">
+              {canvas.checklist.items.map((item) => (
+                <li key={item.label} className={item.done ? 'canvas-check__item canvas-check__item--done' : 'canvas-check__item'}>
+                  <span aria-hidden="true">{item.done ? '●' : '○'}</span>
+                  <div>
+                    <strong>{item.label}</strong>
+                    {item.owner ? <p>{item.owner}</p> : null}
+                  </div>
+                </li>
+              ))}
             </ul>
           </section>
         ) : null}

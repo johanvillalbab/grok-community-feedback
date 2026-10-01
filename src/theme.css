@@ -710,3 +710,182 @@ html[data-theme="light"] .canvas-row--warning > :first-child {
 html[data-theme="light"] .canvas-row--neutral > :first-child {
   background-image: radial-gradient(circle at 8px 50%, #6e6d68 2px, transparent 2.5px);
 }
+
+html[data-theme="light"] .nav-dest {
+  color: #1c1c1a;
+}
+
+html[data-theme="light"] .nav-dest svg {
+  color: #5c5c58;
+}
+
+html[data-theme="light"] .nav-dest:hover,
+html[data-theme="light"] .nav-dest:focus-visible,
+html[data-theme="light"] .chat-header__identity--button:hover,
+html[data-theme="light"] .chat-header__identity--button:focus-visible {
+  background: #eeeee9;
+  color: #111;
+}
+
+html[data-theme="light"] .sidebar-footer__item--active,
+html[data-theme="light"] .sidebar-profile--active,
+html[data-theme="light"] .nav-dest--active {
+  background: #e2e1dc;
+  color: #111;
+}
+
+html[data-theme="light"] .chat-link--button,
+html[data-theme="light"] .ws-linkish {
+  color: #0b66c3;
+}
+
+html[data-theme="light"] .workspace-sample-note,
+html[data-theme="light"] .workspace-screen__icon,
+html[data-theme="light"] .goal-card__summary,
+html[data-theme="light"] .artifact-row span,
+html[data-theme="light"] .market-card span,
+html[data-theme="light"] .ws-pick span,
+html[data-theme="light"] .goal-card__top,
+html[data-theme="light"] .goal-card__meta,
+html[data-theme="light"] .activity-item__top,
+html[data-theme="light"] .activity-item__meta,
+html[data-theme="light"] .goal-detail__owners,
+html[data-theme="light"] .goal-plan__owner,
+html[data-theme="light"] .artifact-detail__source,
+html[data-theme="light"] .digest-card__evidence,
+html[data-theme="light"] .activity-instrument-note,
+html[data-theme="light"] .settings-dl dt,
+html[data-theme="light"] .ws-modal__header p,
+html[data-theme="light"] .ws-modal__body p,
+html[data-theme="light"] .ws-field {
+  color: #5f5f5b;
+}
+
+html[data-theme="light"] .workspace-empty,
+html[data-theme="light"] .workspace-empty p,
+html[data-theme="light"] .goal-detail p,
+html[data-theme="light"] .artifact-detail p,
+html[data-theme="light"] .market-detail p,
+html[data-theme="light"] .settings-pane p,
+html[data-theme="light"] .digest-card > p,
+html[data-theme="light"] .settings-dl dd,
+html[data-theme="light"] .settings-table th,
+html[data-theme="light"] .settings-table td {
+  color: #1c1c1a;
+}
+
+html[data-theme="light"] .workspace-empty h2,
+html[data-theme="light"] .goal-detail h2,
+html[data-theme="light"] .artifact-detail h2,
+html[data-theme="light"] .market-detail h2,
+html[data-theme="light"] .settings-pane h2,
+html[data-theme="light"] .goal-card strong,
+html[data-theme="light"] .artifact-row strong,
+html[data-theme="light"] .market-card strong,
+html[data-theme="light"] .ws-pick strong,
+html[data-theme="light"] .digest-card h2,
+html[data-theme="light"] .goal-plan strong,
+html[data-theme="light"] .ws-modal__header h2 {
+  color: #1c1c1a;
+}
+
+html[data-theme="light"] .goal-detail__kicker {
+  color: #5f5f5b;
+}
+
+html[data-theme="light"] .goal-card,
+html[data-theme="light"] .artifact-row,
+html[data-theme="light"] .market-card,
+html[data-theme="light"] .ws-pick,
+html[data-theme="light"] .digest-card,
+html[data-theme="light"] .activity-item,
+html[data-theme="light"] .ws-modal {
+  border-color: #e4e3de;
+  background: #fff;
+  color: #1c1c1a;
+  box-shadow: none;
+}
+
+html[data-theme="light"] .goal-card:hover,
+html[data-theme="light"] .artifact-row:hover,
+html[data-theme="light"] .market-card:hover,
+html[data-theme="light"] .ws-pick:hover,
+html[data-theme="light"] .goal-card--active,
+html[data-theme="light"] .artifact-row--active,
+html[data-theme="light"] .market-card--active {
+  border-color: #d5d4cf;
+  background: #f7f6f3;
+}
+
+html[data-theme="light"] .goal-progress,
+html[data-theme="light"] .goal-progress span {
+  background: #e4e3de;
+}
+
+html[data-theme="light"] .goal-progress span {
+  background: #155aab;
+}
+
+html[data-theme="light"] .goal-status,
+html[data-theme="light"] .filter-chip,
+html[data-theme="light"] .artifact-row__kind,
+html[data-theme="light"] .digest-card__cluster {
+  background: #ecebe6;
+  color: #3a3a37;
+}
+
+html[data-theme="light"] .goal-status--done {
+  color: #0d7a46;
+}
+
+html[data-theme="light"] .goal-status--blocked,
+html[data-theme="light"] .digest-card--warning {
+  color: #8a5600;
+}
+
+html[data-theme="light"] .filter-chip--active {
+  background: #155aab;
+  color: #fff;
+}
+
+html[data-theme="light"] .activity-event {
+  background: #f3eefb;
+  color: #5b3cc4;
+}
+
+html[data-theme="light"] .ws-button,
+html[data-theme="light"] .settings-select,
+html[data-theme="light"] .ws-field input {
+  border-color: #d5d4cf;
+  background: #fff;
+  color: #1c1c1a;
+}
+
+html[data-theme="light"] .ws-button:hover,
+html[data-theme="light"] .ws-button:focus-visible {
+  background: #eeeee9;
+}
+
+html[data-theme="light"] .ws-button--ghost,
+html[data-theme="light"] .ws-button--tiny {
+  background: transparent;
+}
+
+html[data-theme="light"] .settings-table th,
+html[data-theme="light"] .settings-table td {
+  border-bottom-color: #ecebe6;
+}
+
+html[data-theme="light"] .ws-modal {
+  box-shadow: 0 18px 40px rgb(28 28 26 / 16%);
+}
+
+html[data-theme="light"] .ws-modal__header,
+html[data-theme="light"] .ws-modal__footer {
+  border-color: #e4e3de;
+}
+
+html[data-theme="light"] .ws-code {
+  background: #f7f6f3;
+  color: #1c1c1a;
+}

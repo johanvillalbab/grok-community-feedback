@@ -8,11 +8,12 @@ import { CloseIcon, FileIcon } from './Icons'
 type PreviewPanelProps = {
   file: WorkspaceFile
   width: number
+  sheet?: boolean
   onWidthChange: (width: number) => void
   onClose: () => void
 }
 
-export function PreviewPanel({ file, width, onWidthChange, onClose }: PreviewPanelProps) {
+export function PreviewPanel({ file, width, sheet = false, onWidthChange, onClose }: PreviewPanelProps) {
   const { panelRef, resizerProps } = useSidePanel(onWidthChange)
 
   useEffect(() => {
@@ -31,15 +32,17 @@ export function PreviewPanel({ file, width, onWidthChange, onClose }: PreviewPan
       ref={panelRef}
       id="file-preview-panel"
       aria-labelledby="file-preview-title"
-      className="preview-panel"
-      style={{ width, flexBasis: width }}
+      className={sheet ? 'preview-panel preview-panel--sheet' : 'preview-panel'}
+      style={sheet ? undefined : { width, flexBasis: width }}
     >
-      <div
-        className="preview-panel__resizer"
-        aria-label="Resize preview"
-        aria-valuenow={width}
-        {...resizerProps}
-      />
+      {sheet ? null : (
+        <div
+          className="preview-panel__resizer"
+          aria-label="Resize preview"
+          aria-valuenow={width}
+          {...resizerProps}
+        />
+      )}
       <header className="preview-panel__header">
         <div className="preview-panel__heading">
           <p>

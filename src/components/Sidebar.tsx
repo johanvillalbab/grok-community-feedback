@@ -9,28 +9,44 @@ import {
   preferredThread,
   visibleThreads,
 } from '../lib/workspace-nav'
-import type { Conversation, NavGroup, Workspace, WorkspaceSource } from '../types'
+import type { Conversation, NavGroup, SideRoom, Workspace, WorkspaceSource, WorkspaceSurface } from '../types'
 import { Avatar } from './Avatar'
 import {
   CheckIcon,
   ChevronDownIcon,
   CloudIcon,
+  FlagIcon,
   FolderIcon,
   GridIcon,
   HashIcon,
+  LayersIcon,
   PlusIcon,
+  PulseIcon,
   SearchIcon,
+  ShieldIcon,
+  SparkIcon,
   SunIcon,
 } from './Icons'
 
 type SidebarProps = {
   workspace: Workspace
   activeId: string
+  activeRoomId: string | null
+  surface: WorkspaceSurface
+  rooms: SideRoom[]
   width: number
+  drawer?: boolean
+  open?: boolean
   onWidthChange: (width: number) => void
   onAnnounce?: (message: string) => void
+  onClose?: () => void
   onSelect: (id: string) => void
+  onSelectRoom: (threadId: string, roomId: string) => void
   onWorkspaceChange: (id: string) => void
+  onOpenSurface: (surface: WorkspaceSurface) => void
+  onCompose: () => void
+  onMarketplace: () => void
+  onProfile: () => void
   theme: 'light' | 'dark'
   onToggleTheme: () => void
 }
@@ -38,17 +54,28 @@ type SidebarProps = {
 export function Sidebar({
   workspace,
   activeId,
+  activeRoomId,
+  surface,
+  rooms,
   width,
+  drawer = false,
+  open = true,
   onWidthChange,
   onAnnounce,
+  onClose,
   onSelect,
+  onSelectRoom,
   onWorkspaceChange,
+  onOpenSurface,
+  onCompose,
+  onMarketplace,
+  onProfile,
   theme,
   onToggleTheme,
 }: SidebarProps) {
   const { panelRef, resizerProps } = useSidebarPanel({ onWidthChange, onAnnounce })
   const listRef = useRef<HTMLElement>(null)
-  const collapsed = isSidebarCollapsed(width)
+  const collapsed = !drawer && isSidebarCollapsed(width)
   const [query, setQuery] = useState('')
   const [openGroups, setOpenGroups] = useState<string[]>(() => {
     const parent = findGroup(workspace, activeId)
@@ -84,15 +111,18 @@ export function Sidebar({
 
   const searching = query.trim().length > 0
   const agents = workspace.agents.filter((group) => matchesQuery(group, query))
-  const empty = agents.length === 0
+  const channels = workspace.channels.filter((group) => matchesQuery(group, query))
+  const destinations = DESTINATIONS.filter((item) => matchesDestination(item, query))
+  const visibleRooms = rooms.filter((room) => matchesRoom(room, query))
+  const empty = agents.length === 0 && channels.length === 0 && destinations.length === 0 && visibleRooms.length === 0
   const treeOverflow = useTreeOverflow(
     listRef,
     `${workspace.id}:${query}:${collapsed}:${openGroups.join(',')}`,
   )
-  const threadCount = agents.reduce(
+  const threadCount = [...agents, ...channels].reduce(
     (sum, group) => sum + visibleThreads(group, query).length,
     0,
-  )
+  ) + visibleRooms.length + destinations.length
 
   useEffect(() => {
     if (!searching) return
@@ -102,19 +132,30 @@ export function Sidebar({
     return () => window.clearTimeout(handle)
   }, [empty, onAnnounce, query, searching, threadCount])
 
+  const sidebarClass = [
+    'grok-sidebar',
+    collapsed ? 'grok-sidebar--collapsed' : '',
+    drawer ? 'grok-sidebar--drawer' : '',
+    drawer && open ? 'grok-sidebar--drawer-open' : '',
+  ].filter(Boolean).join(' ')
+
   return (
     <aside
       ref={panelRef}
-      className={collapsed ? 'grok-sidebar grok-sidebar--collapsed' : 'grok-sidebar'}
-      style={{ width, flexBasis: width }}
+      className={sidebarClass}
+      style={drawer ? undefined : { width, flexBasis: width }}
       aria-label="Workspace sidebar"
+      aria-hidden={drawer && !open}
+      id="workspace-nav"
     >
-      <div
-        className="sidebar-resizer"
-        aria-label={collapsed ? 'Expand workspace sidebar' : 'Resize workspace sidebar'}
-        aria-valuenow={width}
-        {...resizerProps}
-      />
+      {drawer ? null : (
+        <div
+          className="sidebar-resizer"
+          aria-label={collapsed ? 'Expand workspace sidebar' : 'Resize workspace sidebar'}
+          aria-valuenow={width}
+          {...resizerProps}
+        />
+      )}
       <div className="sidebar-top">
         <div className="windowbar">
           <span className="window-dots" aria-hidden="true">
@@ -122,7 +163,12 @@ export function Sidebar({
             <span className="window-dot window-dot--yellow" />
             <span className="window-dot window-dot--green" />
           </span>
-          <button type="button" className="sidebar-plus" aria-label="New thread">
+          {drawer ? (
+            <button type="button" className="sidebar-close" aria-label="Close workspace menu" onClick={onClose}>
+              Close
+            </button>
+          ) : null}
+          <button type="button" className="sidebar-plus" aria-label="New conversation" onClick={onCompose}>
             <PlusIcon />
           </button>
         </div>
@@ -158,7 +204,37 @@ export function Sidebar({
           aria-label={`${workspace.name} navigation`}
         >
           {empty ? (
-            <p className="sidebar-empty">No threads match “{query.trim()}”</p>
+            <div className="sidebar-empty">
+              <p>No threads match “{query.trim()}”</p>
+              <button type="button" className="ws-linkish" onClick={() => setQuery('')}>Clear search</button>
+              <button type="button" className="ws-linkish" onClick={() => onOpenSurface({ kind: 'goals' })}>Browse Goals</button>
+              <button type="button" className="ws-linkish" onClick={() => onOpenSurface({ kind: 'digest' })}>Open digest</button>
+            </div>
+          ) : null}
+          {destinations.length > 0 ? (
+            <section className="nav-section" aria-labelledby="nav-section-workspace">
+              <h2 className="nav-section__label" id="nav-section-workspace">Workspace</h2>
+              <ul className="nav-section__list">
+                {destinations.map((item) => {
+                  const current = surface.kind === item.kind
+                  return (
+                    <li key={item.kind}>
+                      <button
+                        type="button"
+                        className={current ? 'nav-dest nav-dest--active' : 'nav-dest'}
+                        aria-current={current ? 'page' : undefined}
+                        aria-label={item.label}
+                        title={collapsed ? item.label : undefined}
+                        onClick={() => openDestination(item.kind, onOpenSurface, onProfile)}
+                      >
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
           ) : null}
           <NavSection
             label="Agents"
@@ -170,15 +246,54 @@ export function Sidebar({
             openGroups={openGroups}
             onToggle={toggleGroup}
             onSelect={selectThread}
+            chatActive={surface.kind === 'chat'}
           />
+          <NavSection
+            label="Channels"
+            groups={channels}
+            activeId={activeId}
+            collapsed={collapsed}
+            query={query}
+            searching={searching}
+            openGroups={openGroups}
+            onToggle={toggleGroup}
+            onSelect={selectThread}
+            chatActive={surface.kind === 'chat'}
+          />
+          {visibleRooms.length > 0 ? (
+            <section className="nav-section" aria-labelledby="nav-section-rooms">
+              <h2 className="nav-section__label" id="nav-section-rooms">Topic rooms</h2>
+              <ul className="nav-section__list">
+                {visibleRooms.map((room) => (
+                  <li key={room.id}>
+                    <button
+                      type="button"
+                      className={
+                        surface.kind === 'chat' && activeId === room.threadId && activeRoomId === room.id
+                          ? 'nav-dest nav-dest--active'
+                          : 'nav-dest'
+                      }
+                      aria-current={surface.kind === 'chat' && activeId === room.threadId && activeRoomId === room.id ? 'page' : undefined}
+                      onClick={() => onSelectRoom(room.threadId, room.id)}
+                    >
+                      <HashIcon />
+                      <span>{room.status === 'archived' ? `${room.title} (archived)` : room.title}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
         </nav>
       </div>
 
       <div className="sidebar-footer">
         <button
           type="button"
-          className="sidebar-footer__item"
+          className={surface.kind === 'marketplace' ? 'sidebar-footer__item sidebar-footer__item--active' : 'sidebar-footer__item'}
           aria-label="Marketplace"
+          aria-current={surface.kind === 'marketplace' ? 'page' : undefined}
+          onClick={onMarketplace}
         >
           <GridIcon />
           <span>Marketplace</span>
@@ -195,8 +310,10 @@ export function Sidebar({
         </button>
         <button
           type="button"
-          className="sidebar-profile"
+          className={surface.kind === 'settings' ? 'sidebar-profile sidebar-profile--active' : 'sidebar-profile'}
           aria-label={CURRENT_USER.name}
+          aria-current={surface.kind === 'settings' ? 'page' : undefined}
+          onClick={onProfile}
         >
           <Avatar agent={CURRENT_USER.agent} size={18} />
           <span>{CURRENT_USER.name}</span>
@@ -216,6 +333,7 @@ function NavSection({
   openGroups,
   onToggle,
   onSelect,
+  chatActive,
 }: {
   label: string
   groups: NavGroup[]
@@ -226,6 +344,7 @@ function NavSection({
   openGroups: string[]
   onToggle: (id: string, name: string, nextOpen: boolean, announce?: boolean) => void
   onSelect: (id: string) => void
+  chatActive: boolean
 }) {
   const headingId = `nav-section-${label.toLowerCase()}`
   if (groups.length === 0) return null
@@ -247,6 +366,7 @@ function NavSection({
               searching={searching}
               onToggle={onToggle}
               onSelect={onSelect}
+              chatActive={chatActive}
             />
           )
         })}
@@ -264,6 +384,7 @@ function NavGroupItem({
   searching,
   onToggle,
   onSelect,
+  chatActive,
 }: {
   group: NavGroup
   open: boolean
@@ -273,11 +394,12 @@ function NavGroupItem({
   searching: boolean
   onToggle: (id: string, name: string, nextOpen: boolean, announce?: boolean) => void
   onSelect: (id: string) => void
+  chatActive: boolean
 }) {
   const panelId = useId()
   const shown = visibleThreads(group, query)
   const unread = groupHasUnread(group)
-  const childActive = group.threads.some((thread) => thread.id === activeId)
+  const childActive = chatActive && group.threads.some((thread) => thread.id === activeId)
   const liveThread = childActive
     ? group.threads.find((thread) => thread.id === activeId) ?? preferredThread(group)
     : preferredThread(group)
@@ -337,7 +459,7 @@ function NavGroupItem({
             <ThreadRow
               key={thread.id}
               thread={thread}
-              selected={thread.id === activeId}
+              selected={chatActive && thread.id === activeId}
               onSelect={onSelect}
             />
           ))}
@@ -345,6 +467,54 @@ function NavGroupItem({
       )}
     </li>
   )
+}
+
+const DESTINATIONS = [
+  { kind: 'goals' as const, label: 'Goals', icon: FlagIcon },
+  { kind: 'activity' as const, label: 'Activity', icon: PulseIcon },
+  { kind: 'digest' as const, label: 'Digest', icon: SparkIcon },
+  { kind: 'artifacts' as const, label: 'Artifacts', icon: LayersIcon },
+  { kind: 'settings' as const, label: 'Settings', icon: ShieldIcon },
+]
+
+function openDestination(
+  kind: (typeof DESTINATIONS)[number]['kind'],
+  onOpenSurface: (surface: WorkspaceSurface) => void,
+  onProfile: () => void,
+) {
+  switch (kind) {
+    case 'goals':
+      onOpenSurface({ kind: 'goals' })
+      return
+    case 'activity':
+      onOpenSurface({ kind: 'activity' })
+      return
+    case 'digest':
+      onOpenSurface({ kind: 'digest' })
+      return
+    case 'artifacts':
+      onOpenSurface({ kind: 'artifacts' })
+      return
+    case 'settings':
+      onProfile()
+      return
+    default: {
+      const _exhaustive: never = kind
+      return _exhaustive
+    }
+  }
+}
+
+function matchesDestination(item: (typeof DESTINATIONS)[number], query: string) {
+  const needle = query.trim().toLowerCase()
+  if (!needle) return true
+  return item.label.toLowerCase().includes(needle) || item.kind.includes(needle)
+}
+
+function matchesRoom(room: SideRoom, query: string) {
+  const needle = query.trim().toLowerCase()
+  if (!needle) return room.status === 'open'
+  return room.title.toLowerCase().includes(needle) || room.topic.toLowerCase().includes(needle)
 }
 
 function ThreadRow({

@@ -229,6 +229,66 @@ The community brings together people who share a craft, questions, and judgment.
 This file is the source of truth for page copy. Any tone change is reviewed with Content & Brand Specialist before it ships.
 `,
   },
+  'origin-main': {
+    id: 'origin-main',
+    path: 'origin/main',
+    name: 'origin/main',
+    language: 'markdown',
+    content: `# origin/main (sample)
+
+This is a fictional branch ref used in the About launch thread. It is not a live git remote.
+
+## What landed
+
+- Home already covers School, audience, Programs, and Community
+- Markdown negotiation from the Accept header is live in the sample
+- Atlas Agentic is visible prose, not hidden text
+
+## Rule
+
+About has to complement identity. Do not repeat the Home intro block.
+`,
+  },
+  'accept-header': {
+    id: 'accept-header',
+    path: 'Accept',
+    name: 'Accept',
+    language: 'markdown',
+    content: `# Accept header (sample)
+
+Fictional protocol note from the Atlas workspace.
+
+1. An agent reads COMPONENT-CONTRACT.md
+2. It replies \`Accept\` before it writes code
+3. Markdown negotiation follows the same header
+
+This chip is a mock. There is no network call.
+`,
+  },
+  'pr-5': {
+    id: 'pr-5',
+    path: 'acme/atlas-platform#5',
+    name: 'PR #5',
+    language: 'markdown',
+    content: `# About PR #5 (sample)
+
+Fictional pull request. This URL is not a live GitHub page.
+
+## Intent
+
+Implement the About page against COMPONENT-CONTRACT.md and UI-PHRASES.md.
+
+## Still open
+
+- Semantic pattern from Core · Engineering
+- Live copy pass from Content & Brand
+- Do not invent primitives outside the contract
+
+## Reviewers (sample)
+
+Full-stack Engineer (author) · Design Engineer · Product Manager
+`,
+  },
 }
 
 export const CANVASES: Record<string, WorkspaceCanvas> = {
@@ -361,6 +421,54 @@ export const CANVASES: Record<string, WorkspaceCanvas> = {
       rowTone: ['success', 'info', 'neutral', 'success'],
     },
   },
+  'preview-cluster': {
+    id: 'preview-cluster',
+    title: 'Preview cluster brief',
+    summary: 'A richer artifact from the proactive digest: quotes, a checklist, and the next move.',
+    source: 'Proactive digest · sample cluster',
+    stats: [
+      { value: '18', label: 'Sample notes', tone: 'info' },
+      { value: '1', label: 'Shipped rail', tone: 'success' },
+      { value: '1', label: 'Naming gap', tone: 'warning' },
+      { value: '0', label: 'Live APIs' },
+    ],
+    callout: {
+      tone: 'success',
+      title: 'The rail exists. The name is the leftover ask.',
+      body: 'People can open a file beside chat. They still ask the bot to say which artifact it just wrote.',
+    },
+    quotes: {
+      title: 'How the notes are phrased',
+      items: [
+        {
+          quote: 'Show me the file the bot just wrote without making me leave the thread.',
+          source: 'Community note · sample',
+        },
+        {
+          quote: 'If there is a board, pin the name of the next artifact on it.',
+          source: 'Office hours · sample',
+        },
+      ],
+    },
+    checklist: {
+      title: 'Next moves (sample)',
+      items: [
+        { label: 'File chips open the preview rail', done: true, owner: 'Design Engineer' },
+        { label: 'Digest names the artifact on attach', done: false, owner: 'Community Manager' },
+        { label: 'Growth can notify after approval', done: false, owner: 'Growth Marketer' },
+      ],
+    },
+    table: {
+      caption: 'Cluster status',
+      headers: ['Ask', 'Owner', 'State'],
+      rows: [
+        ['Open .md beside chat', 'Design Engineer', 'Shipped'],
+        ['Name the artifact in digest', 'Community Manager', 'In progress'],
+        ['Notify on attach', 'Growth Marketer', 'Needs approval'],
+      ],
+      rowTone: ['success', 'info', 'warning'],
+    },
+  },
   'about-plan': {
     id: 'about-plan',
     title: 'About plan',
@@ -473,6 +581,15 @@ export const CANVASES: Record<string, WorkspaceCanvas> = {
 
 export const CONVERSATION_CANVASES: Record<string, string[]> = {
   'design-1': ['about-plan', 'about-launch', 'feedback-map'],
+  'design-2': ['about-launch', 'feedback-map'],
+  'community-1': ['feedback-map', 'preview-cluster'],
+  'community-2': ['feedback-map', 'preview-cluster'],
+  'pm-1': ['about-plan', 'about-launch'],
+  'pm-2': ['about-plan'],
+  'fullstack-1': ['about-launch'],
+  'ch-about-1': ['about-launch', 'about-plan'],
+  'ch-launch-1': ['about-launch'],
+  'ch-community-1': ['feedback-map', 'preview-cluster'],
 }
 
 export function canvasesForConversation(conversationId: string): WorkspaceCanvas[] {
@@ -797,6 +914,8 @@ export const FEEDS: Record<string, FeedItem[]> = {
           aboutCanvasChip,
           { type: 'text', text: '. Community notes that asked for this live in ' },
           feedbackCanvasChip,
+          { type: 'text', text: '. The goal on the board is ' },
+          { type: 'goal', goalId: 'goal-about-identity', text: 'Ship About as identity' },
           { type: 'text', text: '.' },
         ],
       ],
@@ -820,6 +939,73 @@ export const FEEDS: Record<string, FeedItem[]> = {
       id: 't4',
       count: 4,
       agents: ['visual'],
+    },
+  ],
+  'community-1': [
+    {
+      kind: 'message',
+      id: 'c1',
+      blocks: [[
+        { type: 'text', text: 'Preview is still the loudest ask. I mapped the sample notes here: ' },
+        { type: 'canvas', canvasId: 'feedback-map' },
+        { type: 'text', text: '. The brief that names the leftover work is ' },
+        { type: 'canvas', canvasId: 'preview-cluster' },
+        { type: 'text', text: '.' },
+      ]],
+    },
+    {
+      kind: 'thread',
+      id: 'c1t',
+      count: 8,
+      agents: ['community', 'pm', 'design'],
+    },
+    {
+      kind: 'message',
+      id: 'c2',
+      blocks: [[
+        { type: 'text', text: 'Goal on the board: ' },
+        { type: 'goal', goalId: 'goal-preview-cluster', text: 'Keep source files beside the thread' },
+        { type: 'text', text: '. The rail shipped. Naming the next artifact is the leftover move.' },
+      ]],
+    },
+  ],
+  'pm-1': [
+    {
+      kind: 'message',
+      id: 'p1',
+      blocks: [[
+        { type: 'text', text: 'About complements Home. Community already said people do not want a second intro. Track it on ' },
+        { type: 'goal', goalId: 'goal-about-identity', text: 'Ship About as identity' },
+        { type: 'text', text: ' and the plan canvas ' },
+        { type: 'canvas', canvasId: 'about-plan' },
+        { type: 'text', text: '.' },
+      ]],
+    },
+  ],
+  'fullstack-1': [
+    {
+      kind: 'message',
+      id: 'f1',
+      blocks: [[
+        { type: 'text', text: 'Opened the sample PR: ' },
+        { type: 'file', fileId: 'pr-5', text: 'acme/atlas-platform#5' },
+        { type: 'text', text: '. Match ' },
+        { type: 'file', fileId: 'contrato' },
+        { type: 'text', text: '. Semantic is next, not a rewrite.' },
+      ]],
+    },
+  ],
+  'ch-about-1': [
+    {
+      kind: 'message',
+      id: 'ca1',
+      blocks: [[
+        { type: 'text', text: 'Channel note: read ' },
+        { type: 'file', fileId: 'contrato' },
+        { type: 'text', text: ' and reply Accept before any About code. Status lives on ' },
+        { type: 'canvas', canvasId: 'about-launch' },
+        { type: 'text', text: '.' },
+      ]],
     },
   ],
 }

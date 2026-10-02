@@ -889,3 +889,98 @@ html[data-theme="light"] .ws-code {
   background: #f7f6f3;
   color: #1c1c1a;
 }
+
+html[data-theme="light"] .settings-cli__open {
+  background: #1c1c1a;
+  color: #f7f6f3;
+  border-color: #1c1c1a;
+}
+
+html[data-theme="light"] .settings-cli__open:hover,
+html[data-theme="light"] .settings-cli__open:focus-visible {
+  background: #111;
+  color: #fff;
+}
+
+html[data-theme="light"] .cli-screen {
+  background: #f3f2ef;
+  color: #1c1c1a;
+}
+
+html[data-theme="light"] .cli-close {
+  border-color: #d5d4cf;
+  color: #1c1c1a;
+}
+
+html[data-theme="light"] .cli-close:hover,
+html[data-theme="light"] .cli-close:focus-visible,
+html[data-theme="light"] .cli-row:hover,
+html[data-theme="light"] .cli-hint:hover,
+html[data-theme="light"] .cli-row:focus-visible,
+html[data-theme="light"] .cli-hint:focus-visible {
+  background: #eeeee9;
+}
+
+html[data-theme="light"] .cli-label,
+html[data-theme="light"] .cli-rule,
+html[data-theme="light"] .cli-facts dt,
+html[data-theme="light"] .cli-row__index,
+html[data-theme="light"] .cli-row__detail,
+html[data-theme="light"] .cli-row__aside,
+html[data-theme="light"] .cli-hint__about,
+html[data-theme="light"] .cli-flow__meta,
+html[data-theme="light"] .cli-flow__detail,
+html[data-theme="light"] .cli-legend,
+html[data-theme="light"] .cli-code__path,
+html[data-theme="light"] .cli-status,
+html[data-theme="light"] .cli-hintline,
+html[data-theme="light"] .cli-prompt__path,
+html[data-theme="light"] .cli-tone--mute,
+html[data-theme="light"] .cli-callout__body {
+  color: #5f5f5b;
+}
+
+html[data-theme="light"] .cli-echo,
+html[data-theme="light"] .cli-prompt input {
+  color: #1c1c1a;
+  caret-color: #1c1c1a;
+}
+
+html[data-theme="light"] .cli-row,
+html[data-theme="light"] .cli-hint,
+html[data-theme="light"] .cli-gantt th,
+html[data-theme="light"] .cli-gantt td,
+html[data-theme="light"] .cli-table th,
+html[data-theme="light"] .cli-table td,
+html[data-theme="light"] .cli-dock,
+html[data-theme="light"] .cli-flow__item:not(:last-child)::before {
+  border-color: #e4e3de;
+}
+
+html[data-theme="light"] .cli-flow__item:not(:last-child)::before {
+  background: #e4e3de;
+}
+
+html[data-theme="light"] .cli-prompt {
+  border-color: #d5d4cf;
+  background: #fff;
+}
+
+html[data-theme="light"] .cli-prompt:focus-within {
+  outline-color: #0f5fbf;
+}
+
+html[data-theme="light"] .cli-bar__track {
+  background: #e4e3de;
+}
+
+html[data-theme="light"] .cli-bar__fill {
+  background: #1c1c1a;
+}
+
+html[data-theme="light"] .cli-tone--info { color: #155aab; }
+html[data-theme="light"] .cli-tone--ok,
+html[data-theme="light"] .cli-callout--success .cli-callout__title { color: #0d7a46; }
+html[data-theme="light"] .cli-tone--warn,
+html[data-theme="light"] .cli-callout--warning .cli-callout__title { color: #8a5600; }
+html[data-theme="light"] .cli-callout--info .cli-callout__title { color: #155aab; }

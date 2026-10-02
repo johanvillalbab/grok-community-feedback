@@ -1,7 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { ActivityLog } from './components/ActivityLog'
 import { ArtifactsView } from './components/ArtifactsView'
+import { CliTerminal } from './components/CliTerminal'
 import { applyTheme, readTheme, type Theme } from './lib/theme'
+import type { CliNavigation } from './lib/cli'
+import { CURRENT_USER } from './data'
 import { CanvasPanel } from './components/CanvasPanel'
 import { Chat } from './components/Chat'
 import { DigestView } from './components/DigestView'
@@ -23,6 +26,7 @@ export default function App() {
   const sheetOpen = workspace.surface.kind !== 'chat'
   const { navOpen, closeNav, setSidebarWidth } = workspace
   const [theme, setTheme] = useState<Theme>(() => readTheme())
+  const [cliOpen, setCliOpen] = useState(false)
 
   useEffect(() => {
     document.body.classList.toggle('is-phone', phone)
@@ -57,8 +61,18 @@ export default function App() {
     phone && previewOpen ? 'grok-app--preview-sheet' : '',
   ].filter(Boolean).join(' ')
 
+  const applyCliNav = (next: CliNavigation) => {
+    if (next.workspaceId && next.workspaceId !== workspace.workspace.id) {
+      workspace.changeWorkspace(next.workspaceId)
+    }
+    if (next.threadId) workspace.selectThread(next.threadId)
+    if (next.artifact?.kind === 'file') workspace.openFile(next.artifact.id)
+    else if (next.artifact?.kind === 'canvas') workspace.openCanvas(next.artifact.id)
+  }
+
   return (
     <div className={appClass}>
+      <div className="grok-workspace" inert={cliOpen ? true : undefined}>
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <div className="sr-only" role="status" aria-atomic="true" aria-live="polite">
         {workspace.liveMessage}
@@ -243,6 +257,10 @@ export default function App() {
           onApproval={workspace.toggleApprovalRequired}
           onNotifyGlobal={workspace.setNotifyGlobal}
           onOpenActivity={(agent) => workspace.openSurface({ kind: 'activity', agent })}
+          onOpenCli={() => {
+            setCliOpen(true)
+            workspace.announce('CLI open.')
+          }}
         />
         </SurfaceFrame>
       ) : null}
@@ -265,6 +283,22 @@ export default function App() {
         />
       ) : null}
       <WorkspaceModals workspace={workspace} phone={phone} />
+      </div>
+      {cliOpen ? (
+        <CliTerminal
+          active
+          userName={CURRENT_USER.name}
+          workspace={workspace.workspace}
+          thread={workspace.conversation}
+          onNavigate={applyCliNav}
+          onExit={() => setCliOpen(false)}
+          onOpenSettings={() => {
+            setCliOpen(false)
+            workspace.openSettings('profile')
+          }}
+          onAnnounce={workspace.announce}
+        />
+      ) : null}
     </div>
   )
 }

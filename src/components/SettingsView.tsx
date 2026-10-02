@@ -15,6 +15,7 @@ type SettingsViewProps = {
   onApproval: (agent: AgentKey) => void
   onNotifyGlobal: (value: boolean) => void
   onOpenActivity: (agent: AgentKey) => void
+  onOpenCli: () => void
   onOpenNav?: () => void
   onBack?: () => void
 }
@@ -36,6 +37,7 @@ export function SettingsView({
   onApproval,
   onNotifyGlobal,
   onOpenActivity,
+  onOpenCli,
   onOpenNav,
   onBack,
 }: SettingsViewProps) {
@@ -69,6 +71,7 @@ export function SettingsView({
         onApproval,
         onNotifyGlobal,
         onOpenActivity,
+        onOpenCli,
       })}
     </WorkspaceScreen>
   )
@@ -84,11 +87,12 @@ function renderSection(
     onApproval: (agent: AgentKey) => void
     onNotifyGlobal: (value: boolean) => void
     onOpenActivity: (agent: AgentKey) => void
+    onOpenCli: () => void
   },
 ) {
   switch (section) {
     case 'profile':
-      return <ProfilePane onOpenActivity={props.onOpenActivity} />
+      return <ProfilePane onOpenActivity={props.onOpenActivity} onOpenCli={props.onOpenCli} />
     case 'autonomy':
       return (
         <AutonomyPane
@@ -115,7 +119,13 @@ function renderSection(
   }
 }
 
-function ProfilePane({ onOpenActivity }: { onOpenActivity: (agent: AgentKey) => void }) {
+function ProfilePane({
+  onOpenActivity,
+  onOpenCli,
+}: {
+  onOpenActivity: (agent: AgentKey) => void
+  onOpenCli: () => void
+}) {
   return (
     <article className="settings-pane">
       <div className="settings-profile">
@@ -140,9 +150,18 @@ function ProfilePane({ onOpenActivity }: { onOpenActivity: (agent: AgentKey) => 
           <dd>In-app only. This build does not send mail. Use the Notifications tab for per-bot toggles.</dd>
         </div>
       </dl>
-      <button type="button" className="ws-button" onClick={() => onOpenActivity('user')}>
-        View operator activity
-      </button>
+      <div className="settings-cli">
+        <h2>CLI</h2>
+        <p>Same threads, files, and canvases. One command at a time.</p>
+        <div className="settings-actions">
+          <button type="button" className="ws-button settings-cli__open" onClick={onOpenCli}>
+            Open CLI
+          </button>
+          <button type="button" className="ws-button ws-button--ghost" onClick={() => onOpenActivity('user')}>
+            View operator activity
+          </button>
+        </div>
+      </div>
     </article>
   )
 }

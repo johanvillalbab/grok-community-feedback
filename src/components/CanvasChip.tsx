@@ -1,5 +1,6 @@
 import { CANVASES } from '../data'
 import { CanvasIcon, PlanIcon } from './Icons'
+import { Bicycle } from '@phosphor-icons/react'
 
 type CanvasChipProps = {
   canvasId: string
@@ -27,6 +28,7 @@ export function CanvasChip({ canvasId, text, active = false, onOpen }: CanvasChi
         }
       }}
     >
+      <Bicycle size={24} style={{ flexShrink: 0 }} />
       {canvas?.gantt ? <PlanIcon /> : <CanvasIcon />}
       {label}
     </span>

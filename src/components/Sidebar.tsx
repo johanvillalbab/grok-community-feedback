@@ -10,6 +10,7 @@ import {
   visibleThreads,
 } from '../lib/workspace-nav'
 import type { Conversation, NavGroup, SideRoom, Workspace, WorkspaceSource, WorkspaceSurface } from '../types'
+import { Atom } from '@phosphor-icons/react'
 import { Avatar } from './Avatar'
 import {
   CheckIcon,
@@ -23,9 +24,6 @@ import {
   PlusIcon,
   PulseIcon,
   SearchIcon,
-  ShieldIcon,
-  SparkIcon,
-  SunIcon,
 } from './Icons'
 
 type SidebarProps = {
@@ -54,7 +52,6 @@ type SidebarProps = {
 export function Sidebar({
   workspace,
   activeId,
-  activeRoomId,
   surface,
   rooms,
   width,
@@ -64,14 +61,11 @@ export function Sidebar({
   onAnnounce,
   onClose,
   onSelect,
-  onSelectRoom,
   onWorkspaceChange,
   onOpenSurface,
   onCompose,
   onMarketplace,
   onProfile,
-  theme,
-  onToggleTheme,
 }: SidebarProps) {
   const { panelRef, resizerProps } = useSidebarPanel({ onWidthChange, onAnnounce })
   const listRef = useRef<HTMLElement>(null)
@@ -168,9 +162,6 @@ export function Sidebar({
               Close
             </button>
           ) : null}
-          <button type="button" className="sidebar-plus" aria-label="New conversation" onClick={onCompose}>
-            <PlusIcon />
-          </button>
         </div>
         <WorkspaceSwitcher
           collapsed={collapsed}
@@ -178,17 +169,25 @@ export function Sidebar({
           workspaces={WORKSPACES}
           onChange={onWorkspaceChange}
         />
-        <label className="sidebar-search">
-          <span className="sr-only">Search threads</span>
-          <SearchIcon className="sidebar-search__icon" />
-          <input
-            type="search"
-            placeholder="Search"
-            className="sidebar-search__input"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </label>
+        <div className="sidebar-actions" style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '0 8px 8px', boxSizing: 'border-box' }}>
+          <button type="button" className="sidebar-new" aria-label="New conversation" onClick={onCompose}>
+            <PlusIcon />
+            <span style={{ flexGrow: 1 }}>New conversation</span>
+            <span style={{ fontSize: 11, color: 'rgb(130, 130, 130)' }} aria-hidden="true">⌘N</span>
+          </button>
+          <label className="sidebar-search">
+            <SearchIcon className="sidebar-search__icon" />
+            <input
+              type="search"
+              placeholder="Search agents, threads…"
+              aria-label="Search agents and threads"
+              className="sidebar-search__input"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+            <span style={{ fontSize: 11, color: 'rgb(110, 110, 110)' }} aria-hidden="true">⌘K</span>
+          </label>
+        </div>
       </div>
 
       <div
@@ -212,8 +211,7 @@ export function Sidebar({
             </div>
           ) : null}
           {destinations.length > 0 ? (
-            <section className="nav-section" aria-labelledby="nav-section-workspace">
-              <h2 className="nav-section__label" id="nav-section-workspace">Workspace</h2>
+            <section className="nav-section" aria-label="Primary">
               <ul className="nav-section__list">
                 {destinations.map((item) => {
                   const current = surface.kind === item.kind
@@ -227,8 +225,17 @@ export function Sidebar({
                         title={collapsed ? item.label : undefined}
                         onClick={() => openDestination(item.kind, onOpenSurface, onProfile)}
                       >
+                        <Atom size={24} style={{ flexShrink: 0 }} />
                         <item.icon />
-                        <span>{item.label}</span>
+                        <span style={{ flexGrow: 1 }}>{item.label}</span>
+                        {item.badge ? (
+                          <span
+                            aria-label={`${item.badge} unread`}
+                            style={{ minWidth: 18, height: 18, padding: '0 5px', borderRadius: 999, backgroundColor: 'rgb(64, 152, 248)', color: 'rgb(255, 255, 255)', fontSize: 11, fontWeight: 650, lineHeight: '18px', textAlign: 'center', boxSizing: 'border-box' }}
+                          >
+                            {item.badge}
+                          </span>
+                        ) : null}
                       </button>
                     </li>
                   )
@@ -260,30 +267,6 @@ export function Sidebar({
             onSelect={selectThread}
             chatActive={surface.kind === 'chat'}
           />
-          {visibleRooms.length > 0 ? (
-            <section className="nav-section" aria-labelledby="nav-section-rooms">
-              <h2 className="nav-section__label" id="nav-section-rooms">Topic rooms</h2>
-              <ul className="nav-section__list">
-                {visibleRooms.map((room) => (
-                  <li key={room.id}>
-                    <button
-                      type="button"
-                      className={
-                        surface.kind === 'chat' && activeId === room.threadId && activeRoomId === room.id
-                          ? 'nav-dest nav-dest--active'
-                          : 'nav-dest'
-                      }
-                      aria-current={surface.kind === 'chat' && activeId === room.threadId && activeRoomId === room.id ? 'page' : undefined}
-                      onClick={() => onSelectRoom(room.threadId, room.id)}
-                    >
-                      <HashIcon />
-                      <span>{room.status === 'archived' ? `${room.title} (archived)` : room.title}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
         </nav>
       </div>
 
@@ -298,26 +281,29 @@ export function Sidebar({
           <GridIcon />
           <span>Marketplace</span>
         </button>
-        <button
-          type="button"
-          className={theme === 'light' ? 'sidebar-footer__item sidebar-footer__item--on' : 'sidebar-footer__item'}
-          aria-pressed={theme === 'light'}
-          aria-label="Light theme"
-          onClick={onToggleTheme}
-        >
-          <SunIcon />
-          <span>Light</span>
-        </button>
-        <button
-          type="button"
-          className={surface.kind === 'settings' ? 'sidebar-profile sidebar-profile--active' : 'sidebar-profile'}
-          aria-label={CURRENT_USER.name}
-          aria-current={surface.kind === 'settings' ? 'page' : undefined}
-          onClick={onProfile}
-        >
+        <div className={surface.kind === 'settings' ? 'sidebar-profile sidebar-profile--active' : 'sidebar-profile'}>
           <Avatar agent={CURRENT_USER.agent} size={18} />
-          <span>{CURRENT_USER.name}</span>
-        </button>
+          <span style={{ flexGrow: 1, fontSize: 13, color: 'rgb(225, 225, 225)' }}>{CURRENT_USER.name}</span>
+          <button type="button" className="sidebar-icon-btn" aria-label="Help and shortcuts">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.7" />
+              <path d="M12 17.2h.01" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="sidebar-icon-btn"
+            aria-label="Settings"
+            aria-current={surface.kind === 'settings' ? 'page' : undefined}
+            onClick={onProfile}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
+            </svg>
+          </button>
+        </div>
       </div>
     </aside>
   )
@@ -351,7 +337,10 @@ function NavSection({
 
   return (
     <section className="nav-section" aria-labelledby={headingId}>
-      <h2 className="nav-section__label" id={headingId}>{label}</h2>
+      <h2 className="nav-section__label" id={headingId}>
+        <span>{label}</span>
+        <span className="nav-section__count" style={{ fontWeight: 400, color: 'rgb(110, 110, 110)' }}>{groups.length}</span>
+      </h2>
       <ul className="nav-section__list">
         {groups.map((group) => {
           const open = searching || openGroups.includes(group.id)
@@ -403,56 +392,54 @@ function NavGroupItem({
   const liveThread = childActive
     ? group.threads.find((thread) => thread.id === activeId) ?? preferredThread(group)
     : preferredThread(group)
-  const showPreview = !open && !collapsed
+  const unreadCount = group.threads.filter((thread) => thread.unread).length
   const displayName = group.kind === 'channel' ? `#${group.name}` : group.name
 
   return (
-    <li className="nav-group">
-      <div className="nav-group__row">
-        {collapsed ? null : (
-          <button
-            type="button"
-            className="nav-group__chevron-btn"
-            aria-expanded={open}
-            aria-controls={panelId}
-            disabled={searching}
-            onClick={() => onToggle(group.id, displayName, !open)}
-          >
-            <ChevronDownIcon className={open ? 'nav-group__chevron nav-group__chevron--open' : 'nav-group__chevron'} />
-            <span className="sr-only">{open ? `Collapse ${displayName}` : `Expand ${displayName}`}</span>
-          </button>
-        )}
-        <button
-          type="button"
-          className={[
-            'nav-group__main',
-            childActive ? 'nav-group__main--current' : '',
-            unread ? 'nav-group__main--unread' : '',
-            showPreview ? 'nav-group__main--preview' : '',
-          ].join(' ')}
-          onClick={() => {
-            if (!open && !collapsed) onToggle(group.id, displayName, true, false)
-            onSelect(liveThread.id)
-          }}
-          aria-current={childActive && (collapsed || !open) ? 'page' : undefined}
-          aria-label={collapsed
-            ? `${displayName}, ${liveThread.title}${unread ? ', unread' : ''}`
-            : undefined}
-          title={collapsed ? displayName : undefined}
+    <li className={open && !collapsed ? 'nav-row nav-row--open' : 'nav-row'}>
+      <button
+        type="button"
+        className={[
+          'nav-group__main',
+          childActive ? 'nav-group__main--current' : '',
+          unread ? 'nav-group__main--unread' : '',
+        ].join(' ')}
+        aria-expanded={collapsed ? undefined : open}
+        aria-controls={collapsed ? undefined : panelId}
+        onClick={() => {
+          if (open && childActive && !collapsed && !searching) {
+            onToggle(group.id, displayName, false)
+            return
+          }
+          if (!open && !collapsed) onToggle(group.id, displayName, true, false)
+          onSelect(liveThread.id)
+        }}
+        aria-current={childActive && (collapsed || !open) ? 'page' : undefined}
+        aria-label={collapsed
+          ? `${displayName}, ${liveThread.title}${unread ? ', unread' : ''}`
+          : undefined}
+        title={collapsed ? displayName : undefined}
+      >
+        <span aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20 }}>
+          <GroupGlyph group={group} size={BOT_FACE} />
+        </span>
+        <span
+          className="nav-group__name"
+          style={{ flexGrow: 1, flexBasis: '0%', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
         >
-          <span aria-hidden="true">
-            <GroupGlyph group={group} size={BOT_FACE} />
+          {displayName}
+        </span>
+        {unread ? (
+          <span
+            className="nav-group__badge"
+            aria-label={unreadCount > 0 ? `${unreadCount} unread` : 'Unread'}
+            style={{ minWidth: 18, height: 18, padding: '0 5px', borderRadius: 999, backgroundColor: 'rgb(38, 62, 96)', color: 'rgb(150, 196, 250)', fontSize: 11, fontWeight: 650, lineHeight: '18px', textAlign: 'center', boxSizing: 'border-box' }}
+          >
+            {unreadCount > 0 ? unreadCount : null}
           </span>
-          <span className="nav-group__copy">
-            <span className="nav-group__name">{displayName}</span>
-            {showPreview ? (
-              <span className="nav-group__preview">{liveThread.title}</span>
-            ) : null}
-          </span>
-          {unread ? <span className="nav-group__unread" aria-hidden="true" /> : null}
-          {unread ? <span className="sr-only">Unread</span> : null}
-        </button>
-      </div>
+        ) : null}
+        {open && !collapsed ? <ChevronDownIcon className="nav-group__chevron nav-group__chevron--open" /> : null}
+      </button>
       {collapsed || !open ? null : (
         <ul className="nav-thread-list" id={panelId}>
           {shown.map((thread) => (
@@ -469,12 +456,15 @@ function NavGroupItem({
   )
 }
 
-const DESTINATIONS = [
-  { kind: 'goals' as const, label: 'Goals', icon: FlagIcon },
-  { kind: 'activity' as const, label: 'Activity', icon: PulseIcon },
-  { kind: 'digest' as const, label: 'Digest', icon: SparkIcon },
-  { kind: 'artifacts' as const, label: 'Artifacts', icon: LayersIcon },
-  { kind: 'settings' as const, label: 'Settings', icon: ShieldIcon },
+const DESTINATIONS: {
+  kind: 'activity' | 'goals' | 'artifacts'
+  label: string
+  icon: typeof PulseIcon
+  badge?: number
+}[] = [
+  { kind: 'activity', label: 'Activity', icon: PulseIcon, badge: 8 },
+  { kind: 'goals', label: 'Goals', icon: FlagIcon },
+  { kind: 'artifacts', label: 'Artifacts', icon: LayersIcon },
 ]
 
 function openDestination(
@@ -489,16 +479,11 @@ function openDestination(
     case 'activity':
       onOpenSurface({ kind: 'activity' })
       return
-    case 'digest':
-      onOpenSurface({ kind: 'digest' })
-      return
     case 'artifacts':
       onOpenSurface({ kind: 'artifacts' })
       return
-    case 'settings':
-      onProfile()
-      return
     default: {
+      void onProfile
       const _exhaustive: never = kind
       return _exhaustive
     }
@@ -539,11 +524,16 @@ function ThreadRow({
         aria-current={selected ? 'page' : undefined}
       >
         <span
-          className={selected ? 'nav-thread__mark nav-thread__mark--active' : 'nav-thread__mark'}
-          aria-hidden="true"
-        />
-        <span className="nav-thread__title">{thread.title}</span>
-        {thread.time ? <span className="nav-thread__time">{thread.time}</span> : null}
+          className={selected ? 'nav-thread__mark nav-thread__mark--active nav-thread__title' : 'nav-thread__mark nav-thread__title'}
+          style={{ flexGrow: 1 }}
+        >
+          {thread.title}
+        </span>
+        {thread.time ? (
+          <span className="nav-thread__time" style={{ fontSize: 11, color: selected ? 'rgb(140, 140, 140)' : 'rgb(120, 120, 120)' }}>
+            {thread.time}
+          </span>
+        ) : null}
         {thread.unread ? <span className="sr-only">Unread</span> : null}
       </button>
     </li>
@@ -686,8 +676,14 @@ function WorkspaceSwitcher({
         }}
         onKeyDown={onButtonKeyDown}
       >
-        <WorkspaceGlyph source={workspace.source} />
-        <span id={labelId} className="workspace-switcher__name">{workspace.name}</span>
+        <span
+          className="workspace-switcher__initial"
+          aria-hidden="true"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: 5, backgroundColor: 'rgb(40, 40, 40)', fontSize: 11, fontWeight: 700, color: 'rgb(220, 220, 220)' }}
+        >
+          {workspace.name.charAt(0).toUpperCase()}
+        </span>
+        <span id={labelId} className="workspace-switcher__name" style={{ flexGrow: 1 }}>{workspace.name}</span>
         <ChevronDownIcon className={open ? 'workspace-switcher__chevron workspace-switcher__chevron--open' : 'workspace-switcher__chevron'} />
       </button>
       {open ? (

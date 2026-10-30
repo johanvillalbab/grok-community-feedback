@@ -4,23 +4,8 @@ type IconProps = {
   className?: string
 }
 
-function Icon({ className, children }: IconProps & { children: ReactNode }) {
-  return (
-    <svg
-      className={className}
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {children}
-    </svg>
-  )
+function Icon(_props: IconProps & { children: ReactNode }) {
+  return null
 }
 
 export function SearchIcon({ className }: IconProps) {
